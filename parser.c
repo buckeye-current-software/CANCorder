@@ -5,6 +5,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "parser.h"
 #include "signal.h"
 #include "MessageAVL.h"
@@ -53,7 +54,11 @@ void parseFile(char *fileName)
 				index++;
 			}
 			messageID[index-5] = '\0';
-			msg.key = messageID;
+			msg.key[0] = messageID[0];
+			msg.key[1] = messageID[1];
+			msg.key[2] = messageID[2];
+			msg.key[3] = messageID[3];
+			msg.key[4] = messageID[4];
 			mt = list_new();
 		}
 		if(strstr(buf, "SG_") != NULL)
@@ -68,7 +73,7 @@ void parseFile(char *fileName)
 			}
 			tmp[index-5] = '\0';
 			signalID = malloc(strlen(tmp));
-			sig.id = signalID*;
+			sig.id = signalID;
 			
 			// Move index +3 to skip uselss dbc stuff
 			index = index + 3;
@@ -79,7 +84,7 @@ void parseFile(char *fileName)
 				index++;
 				index2++;
 			}
-			startBit[index2] = '\0'
+			startBit[index2] = '\0';
 			sig.startBit = atoi(startBit); // Converts string to int
 			index2 = 0;
 			index++;

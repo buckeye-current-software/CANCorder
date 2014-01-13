@@ -25,7 +25,7 @@ struct my_list
 };
 
 
-struct signal* list_add_element( struct my_list*, const struct signal);
+struct signal_structure* list_add_element( struct my_list*, struct signal_structure);
 struct my_list* list_remove_element( struct my_list*);
 
 

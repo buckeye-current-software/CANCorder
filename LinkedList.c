@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "LinkedList.h"
+#include "signal.h"
 
  
 /*
@@ -32,10 +33,10 @@ int main(void)
  
  
 /* Will always return the pointer to my_list */
-struct signal* list_add_element(struct my_list* s, const struct signal sig)
+struct signal_structure* list_add_element(struct my_list* s, struct signal_structure sig)
 {
-  struct signal* currentSig = mallac(sizeof(struct signal));
-  currentSig* = sig;
+  struct signal_structure* currentSig = mallac(sizeof(struct signal_structure));
+  *currentSig = sig;
   
 
   struct linked_list* p = malloc( 1 * sizeof(*p) );

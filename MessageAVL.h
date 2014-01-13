@@ -1,5 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef MESSAGEAVL_H_
+#define MESSAGEAVL_H_
+
 #include "avl.h"
 
 // Structure we want to store
@@ -18,3 +19,4 @@ void data_delete(void *d);
 
 void data_copy(void *src, void *dst);
 
+#endif //MESSAGEAVL_H_

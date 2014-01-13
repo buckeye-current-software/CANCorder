@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "signal.h"
-#include "MessageAVL.h"
-#include "LinkedList.h"
+#ifndef PARSER_H_
+#define PARSER_H_
 
 /* char * is a string? */
 void parseFile(char *fileName);
+
+#endif //PARSER_H_

@@ -1,4 +1,7 @@
-/* 
+#ifndef SIGNAL_H_
+#define SIGNAL_H_
+
+/*
  *  Holds information needed to decode messages
  *	Data types:
  *		1: unsigned int
@@ -14,3 +17,5 @@ struct signal_structure
 	int byteOrder;
 	int dataType;
 };
+
+#endif // SIGNAL_H_

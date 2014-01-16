@@ -8,6 +8,8 @@
 #ifndef LINKEDLIST_H_
 #define LINKEDLIST_H_
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "signal.h"
 
  //Stores signals
@@ -25,7 +27,7 @@ struct my_list
 };
 
 
-struct signal_structure* list_add_element( struct my_list*, struct signal_structure);
+struct signal_structure list_add_element( struct my_list*, struct signal_structure);
 struct my_list* list_remove_element( struct my_list*);
 
 

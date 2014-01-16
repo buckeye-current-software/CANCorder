@@ -33,9 +33,9 @@ int main(void)
  
  
 /* Will always return the pointer to my_list */
-struct signal_structure* list_add_element(struct my_list* s, struct signal_structure sig)
+struct signal_structure list_add_element(struct my_list* s, struct signal_structure sig)
 {
-  struct signal_structure* currentSig = mallac(sizeof(struct signal_structure));
+  struct signal_structure* currentSig = malloc(sizeof(struct signal_structure));
   *currentSig = sig;
   
 
@@ -44,7 +44,6 @@ struct signal_structure* list_add_element(struct my_list* s, struct signal_struc
   if( NULL == p )
     {
       fprintf(stderr, "IN %s, %s: malloc() failed\n", __FILE__, "list_add");
-      return &currentSig; 
     }
  
   p->signal = sig;
@@ -56,20 +55,17 @@ struct signal_structure* list_add_element(struct my_list* s, struct signal_struc
       printf("Queue not initialized\n");
       free(p);
 	  free(currentSig);
-      return &currentSig;
     }
   else if( NULL == s->head && NULL == s->tail )
     {
       /* printf("Empty list, adding p->num: %d\n\n", p->num);  */
       s->head = s->tail = p;
-      return &currentSig;
     }
   else if( NULL == s->head || NULL == s->tail )
     {
       fprintf(stderr, "There is something seriously wrong with your assignment of head/tail to the list\n");
       free(p);
 	  free(currentSig);
-      return NULL;
     }
   else
     {
@@ -78,7 +74,7 @@ struct signal_structure* list_add_element(struct my_list* s, struct signal_struc
       s->tail = p;
     }
  
-  return &currentSig;
+  return *currentSig;
 }
  
  

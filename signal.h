@@ -11,7 +11,7 @@
 
 struct signal_structure
 {
-	char *id;
+	char id[20];
 	int startBit;
 	int length;
 	int byteOrder;

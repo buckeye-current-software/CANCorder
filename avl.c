@@ -512,9 +512,10 @@ int insert_elmt_recur(node *n, node add_node, int (*data_cmp) (void *, void *))
 
     // Check if current node is the node you want to add
     if (cmp == 0)
-        // node already exist
+    {
+        // node already exists
         return 1;
-
+    }
     if (cmp > 0) {
         // Current node is higher that node you want to add
         // Insert it on left subtree.
@@ -527,8 +528,11 @@ int insert_elmt_recur(node *n, node add_node, int (*data_cmp) (void *, void *))
             *n = equi_left(*n);
             return 0;
         } else
+        {
             // node not inserted in subtree
+        	//printf("Compared returned 0. Don't add node..? \n");
             return 1;
+        }
     } else {
         // Current node is smaller that node you want to add
         // Insert it on right subtree.
@@ -541,8 +545,11 @@ int insert_elmt_recur(node *n, node add_node, int (*data_cmp) (void *, void *))
             *n = equi_right(*n);
             return 0;
         } else
+        {
             // node not inserted in subtree
+        	//printf("Compare returned 0. Don't add node \n");
             return 1;
+        }
     }
 
 }
@@ -937,8 +944,10 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
 
     // check if data is already present
     if (is_present(t, data))
+    {
+    	printf("Data is already present");
         return t->count;
-
+    }
     // Allocate memory for the new data and copy data.
     to_add = malloc(sizeof(struct _node));
     to_add->data = malloc(datasize);
@@ -951,10 +960,12 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
 
     // increment counter of element if so.
     if (!present) {
-        DLOG("New data was added.");
+        DLOG("New data was added.\n");
+        printf("New data was added.\n");
         return ++t->count;
     } else {
-        DLOG("Data was updated.");
+        DLOG("Data was updated.\n");
+        printf("Data was updated.\n");
         return t->count;
     }
 }

@@ -10,62 +10,10 @@
 #include "signal.h"
 #include "LinkedList.h"
 #include "avl.h"
+#include "MessageAVL.h"
+#include "SignalAVL.h"
 
-struct message_node {
-    char key[5];
-    struct my_list *list;
-};
 
-struct signal_node {
-	char key[20];
-	struct signal_structure signal;
-};
-
-int data_cmp(void *a, void *b)
-{
-    struct message_node *aa = (struct message_node *) a;
-    struct message_node *bb = (struct message_node *) b;
-
-    // Protect against NULL pointer
-    // It could generally never happened
-    if (!aa || !bb)
-        return 0;
-
-    return memcmp(aa->key, bb->key, sizeof(aa->key));
-}
-
-// Function that dumps data structure
-void data_print(void *d)
-{
-	/*
-	 * Mostly deleted. Only used to initialize a tree
-	 */
-    struct message_node *dd = (struct message_node *) d;
-    if (dd)
-    	printf("{ %s => %s }\n", dd->key, dd->list->head->signal->id);
-}
-
-// Function that delete a data structure
-void data_delete(void *d)
-{
-    struct message_node *dd = (struct message_node *) d;
-
-    if (dd) {
-        // You can put here all additional needed
-        // memory deallocation
-        free(dd);
-    }
-}
-
-// Function that copy data structure
-void data_copy(void *src, void *dst)
-{
-    struct message_node *s = (struct message_node *) src;
-    struct message_node *d = (struct message_node *) dst;
-
-    d->key[5] = s->key[5];
-    d->list = s->list;
-}
 
 void parseFile(char *fileName)
 {
@@ -74,7 +22,7 @@ void parseFile(char *fileName)
 	file = fopen(fileName, "r");
 	if (file == NULL)
 	{
-		fprintf(stderr, "Can't open %s\n", *fileName);
+		fprintf(stderr, "Can't open %s\n", fileName);
 		exit(1);		
 	}
 
@@ -90,10 +38,10 @@ void parseFile(char *fileName)
 	struct signal_node sig_node;
 	struct signal_structure sig;
 	
-	tree *msg_tree = NULL;
-	msg_tree = init_dictionnary(data_cmp, data_print, data_delete, data_copy);
-	tree *signal_tree = NULL;
-	signal_tree = init_dictionnary(data_cmp, data_print, data_delete, data_copy);
+	unsigned int test; // remove me after parser works
+
+	tree *msg_tree = initialize_msg_avl();
+	tree *signal_tree = initialize_signal_avl();
 	
 	
 	while(fgets(buf,BUFSIZ,file) != NULL)
@@ -103,8 +51,12 @@ void parseFile(char *fileName)
 			if(msg.key[0] != '\0')
 			{
 				// add current linked_list and message to Message AVL tree
-				msg.list = mt;
+				msg.list = mt; //Getting a warning before about "assignment from incompatible pointer type"
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
+				list_free(mt);
+				free(mt);
+				mt = NULL;
+				fprintf(stdout, "Inserting message node into msg tree \n");
 			}
 			index = 4;
 			while(buf[index] != ' ')
@@ -128,7 +80,6 @@ void parseFile(char *fileName)
 			{
 				tmp[index-5] = buf[index];
 				index++;
-				//malloc?
 			}
 			tmp[index-5] = '\0';
 			tmpLength = strlen(tmp)+1;
@@ -136,6 +87,7 @@ void parseFile(char *fileName)
 			strcpy(signalID, tmp);
 			strcpy(sig.id, signalID);
 			strcpy(sig_node.key, signalID);
+			printf("Key for sig_node: %s\n", sig_node.key);
 			
 			// Move index +3 to skip uselss dbc stuff
 			index = index + 3;
@@ -188,8 +140,12 @@ void parseFile(char *fileName)
 			// Add signal to linked_list
 			sig_node.signal = list_add_element(mt, sig);
 
+			fprintf(stdout, "Inserting node into signal tree \n");
 			// Add signal to signal node, add signal node to AVL tree
-			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
+			test = insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
+			free(signalID);
+			fprintf(stdout, "node: %i \n", test);
+
 		}
 		// Is there a way to do this in C? 
 		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
@@ -198,6 +154,9 @@ void parseFile(char *fileName)
 			{
 				msg.list = mt;
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
+				list_free(mt);
+				free(mt);
+				mt = NULL;
 				added_last_msg = 1;
 			}
 			index = 15;
@@ -222,6 +181,7 @@ void parseFile(char *fileName)
 			{
 				sig_node.signal.dataType = 4;
 			}
+			free(signalID);
 
 		}
 	}

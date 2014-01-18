@@ -6,7 +6,7 @@
 // key is used to order data
 // Using linked_list to store all signals for that message
 struct message_node {
-    char key[5];
+    char *key;
     struct my_list *list;
 };
 

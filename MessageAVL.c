@@ -46,11 +46,7 @@ void data_copy_msg(void *src, void *dst)
     struct message_node *s = (struct message_node *) src;
     struct message_node *d = (struct message_node *) dst;
 
-    d->key[0] = s->key[0];
-    d->key[1] = s->key[1];
-    d->key[2] = s->key[2];
-    d->key[3] = s->key[3];
-    d->key[4] = s->key[4];
+    d->key = s->key;
     d->list = s->list;
 }
 

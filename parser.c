@@ -29,17 +29,15 @@ void parseFile(char *fileName)
 	/* Read a line in at a time */
 	char buf[BUFSIZ], messageID[5], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
 	char *signalID;
-	int index, index2 = 0, tmpLength;
-	int added_last_msg = 0;
+	int index, index2 = 0, tmpLength; // Variables used to store signalID's into smaller arrays
+	int added_last_msg = 0;           // Used to save the last message in the file
 	
-	struct my_list* mt = NULL; // Message list (RENAME THIS BECAUSE ITS AWFUL)
+	struct my_list* signal_linked_list = NULL; // Linked list of signals all in a single message
 	struct message_node msg;
-	msg.key[0] = '\0';
-	struct signal_node sig_node;
-	struct signal_structure sig;
+	struct signal_node sig_node; // The nodes that will go into the signal AVL tree
+	struct signal_structure sig; // An actual signal structure
+	msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
 	
-	unsigned int test; // remove me after parser works
-
 	tree *msg_tree = initialize_msg_avl();
 	tree *signal_tree = initialize_signal_avl();
 	
@@ -51,12 +49,13 @@ void parseFile(char *fileName)
 			if(msg.key[0] != '\0')
 			{
 				// add current linked_list and message to Message AVL tree
-				msg.list = mt; //Getting a warning before about "assignment from incompatible pointer type"
+				msg.list = signal_linked_list; //Getting a warning before about "assignment from incompatible pointer type"
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-				list_free(mt);
-				free(mt);
-				mt = NULL;
-				fprintf(stdout, "Inserting message node into msg tree \n");
+
+				// Frees memory from the linked_list after it has been copied and storied into message_avl
+				list_free(signal_linked_list);
+				free(signal_linked_list);
+				signal_linked_list = NULL;
 			}
 			index = 4;
 			while(buf[index] != ' ')
@@ -65,12 +64,11 @@ void parseFile(char *fileName)
 				index++;
 			}
 			messageID[index-4] = '\0';
-			msg.key[0] = messageID[0];
-			msg.key[1] = messageID[1];
-			msg.key[2] = messageID[2];
-			msg.key[3] = messageID[3];
-			msg.key[4] = messageID[4];
-			mt = list_new();
+			tmpLength = strlen(messageID) + 1;
+			msg.key = (char*)malloc(tmpLength * sizeof(char));
+			strcpy(msg.key, messageID);
+
+			signal_linked_list = list_new();
 		}
 		if(strstr(buf, "SG_") != NULL)
 		{
@@ -79,17 +77,19 @@ void parseFile(char *fileName)
 			while(buf[index] != ' ')
 			{
 				tmp[index-5] = buf[index];
-				index++;
+			index++;
 			}
 			tmp[index-5] = '\0';
+
+			// Allocate smallest char array possible to store signal_ID
 			tmpLength = strlen(tmp)+1;
 			signalID =(char*)malloc(tmpLength * sizeof(char));
+			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
 			strcpy(signalID, tmp);
 			strcpy(sig.id, signalID);
 			strcpy(sig_node.key, signalID);
-			printf("Key for sig_node: %s\n", sig_node.key);
 			
-			// Move index +3 to skip uselss dbc stuff
+			// Move index +3 to skip useless dbc formatting stuff
 			index = index + 3;
 			// Store start bit
 			while(buf[index] != '|')
@@ -138,25 +138,23 @@ void parseFile(char *fileName)
 			}
 			
 			// Add signal to linked_list
-			sig_node.signal = list_add_element(mt, sig);
+			sig_node.signal = list_add_element(signal_linked_list, sig);
 
 			fprintf(stdout, "Inserting node into signal tree \n");
 			// Add signal to signal node, add signal node to AVL tree
-			test = insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
+			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
 			free(signalID);
-			fprintf(stdout, "node: %i \n", test);
-
 		}
-		// Is there a way to do this in C? 
+
 		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
 		{
 			if(added_last_msg == 0)
 			{
-				msg.list = mt;
+				msg.list = signal_linked_list;
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-				list_free(mt);
-				free(mt);
-				mt = NULL;
+				list_free(signal_linked_list);
+				free(signal_linked_list);
+				signal_linked_list = NULL;
 				added_last_msg = 1;
 			}
 			index = 15;
@@ -168,6 +166,7 @@ void parseFile(char *fileName)
 			tmp[index] = '\0';
 			tmpLength = strlen(tmp)+1;
 			signalID =(char*)malloc(tmpLength * sizeof(char));
+			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
 			strcpy(sig_node.key, tmp);
 
 			get_data(signal_tree, &sig_node, sizeof(struct signal_node));
@@ -185,11 +184,10 @@ void parseFile(char *fileName)
 
 		}
 	}
-	fprintf(stdout, "Message Tree: \n");
+	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
 	print_tree(msg_tree);
 	fprintf(stdout, "Signal Tree: \n");
 	print_tree(signal_tree);
 	
 	fclose(file);
-	fprintf(stdout, "DONE!");
 }

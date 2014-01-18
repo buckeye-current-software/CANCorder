@@ -11,7 +11,7 @@
 #include "signal.h"
 
 struct signal_node {
-	char key[20];
+	char *key;
 	struct signal_structure signal;
 };
 

@@ -13,6 +13,7 @@
 struct signal_node {
 	char *key;
 	struct signal_structure signal;
+	double value;
 };
 
 int data_cmp_sig(void *a, void *b);

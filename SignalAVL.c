@@ -57,7 +57,6 @@ void data_copy_sig(void *src, void *dst)
     struct signal_node *d = (struct signal_node *) dst;
 
     d->key = s->key;
-
     d->signal = s->signal;
 }
 

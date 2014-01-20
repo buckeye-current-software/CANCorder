@@ -6,8 +6,10 @@
  */
 #include "translator.h"
 
-//void translate(tree *signal_tree, struct canfd_frame frame) {
-	//char *byteArray = frame.data;
+/*
+void translate(tree *signal_tree, struct canfd_frame *frame) {
+	__u32 msgID = frame->can_id;
+	char *byteArray = frame->data;
 
-//}
-
+}
+*/

@@ -11,7 +11,7 @@
 
 struct signal_structure
 {
-	char id[20];
+	char *id; // Please make this dynamic
 	int startBit;
 	int length;
 	int byteOrder;

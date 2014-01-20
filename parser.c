@@ -13,7 +13,8 @@
 #include "MessageAVL.h"
 #include "SignalAVL.h"
 
-
+extern tree *msg_tree;
+extern tree *signal_tree;
 
 void parseFile(char *fileName)
 {
@@ -27,26 +28,24 @@ void parseFile(char *fileName)
 	}
 
 	/* Read a line in at a time */
-	char buf[BUFSIZ], messageID[5], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
+	char buf[BUFSIZ], messageID[10], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
 	char *signalID;
 	int index, index2 = 0, tmpLength; // Variables used to store signalID's into smaller arrays
+	int first_insert_skipped = 0;     // Skips inserting the first message since no signals have been associated to it yet (it's added later)
 	int added_last_msg = 0;           // Used to save the last message in the file
 	
 	struct my_list* signal_linked_list = NULL; // Linked list of signals all in a single message
 	struct message_node msg;
 	struct signal_node sig_node; // The nodes that will go into the signal AVL tree
 	struct signal_structure sig; // An actual signal structure
-	msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
-	
-	tree *msg_tree = initialize_msg_avl();
-	tree *signal_tree = initialize_signal_avl();
+	//msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
 	
 	
 	while(fgets(buf,BUFSIZ,file) != NULL)
 	{
 		if(strstr(buf, "BO_") != NULL)
 		{
-			if(msg.key[0] != '\0')
+			if(first_insert_skipped == 1) //msg.key isn't NULL since it is a pointer to the thing in message_node
 			{
 				// add current linked_list and message to Message AVL tree
 				msg.list = signal_linked_list; //Getting a warning before about "assignment from incompatible pointer type"
@@ -57,6 +56,8 @@ void parseFile(char *fileName)
 				free(signal_linked_list);
 				signal_linked_list = NULL;
 			}
+			first_insert_skipped = 1; // Start adding messages to tree after first msg in file found and skipped
+
 			index = 4;
 			while(buf[index] != ' ')
 			{
@@ -85,6 +86,7 @@ void parseFile(char *fileName)
 			tmpLength = strlen(tmp)+1;
 			signalID =(char*)malloc(tmpLength * sizeof(char));
 			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
+			sig.id = (char*)malloc(tmpLength * sizeof(char));
 			strcpy(signalID, tmp);
 			strcpy(sig.id, signalID);
 			strcpy(sig_node.key, signalID);
@@ -137,6 +139,7 @@ void parseFile(char *fileName)
 				sig.dataType = 2; // Represents unsigned int
 			}
 			
+
 			// Add signal to linked_list
 			sig_node.signal = list_add_element(signal_linked_list, sig);
 

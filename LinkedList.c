@@ -39,7 +39,7 @@ struct signal_structure list_add_element(struct my_list* s, struct signal_struct
   *currentSig = sig;
   
 
-  struct linked_list* p = malloc( 1 * sizeof(*p) );
+  struct list_node* p = malloc( 1 * sizeof(*p) );
  
   if( NULL == p )
     {
@@ -81,8 +81,8 @@ struct signal_structure list_add_element(struct my_list* s, struct signal_struct
 /* This is a queue and it is FIFO, so we will always remove the first element */
 struct my_list* list_remove_element( struct my_list* s )
 {
-  struct linked_list* h = NULL;
-  struct linked_list* p = NULL;
+  struct list_node* h = NULL;
+  struct list_node* p = NULL;
  
   if( NULL == s )
     {
@@ -139,7 +139,7 @@ struct my_list* list_new(void)
  
 void list_print( const struct my_list* ps )
 {
-  struct linked_list* p = NULL;
+  struct list_node* p = NULL;
  
   if( ps )
     {
@@ -153,7 +153,7 @@ void list_print( const struct my_list* ps )
 }
  
  
-void list_print_element(const struct linked_list* p )
+void list_print_element(const struct list_node* p )
 {
   if( p ) 
     {

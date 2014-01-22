@@ -12,7 +12,7 @@
 
 struct signal_node {
 	char *key;
-	struct signal_structure signal;
+	struct signal_structure signal; // I think this isn't needed
 	double value;
 };
 

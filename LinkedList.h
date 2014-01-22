@@ -13,17 +13,17 @@
 #include "signal.h"
 
  //Stores signals
-struct linked_list //rename to list node
+struct list_node //rename to list node
 {
   struct signal_structure signal;
-  struct linked_list* next;
+  struct list_node* next;
 };
 
 
 struct my_list
 {
-  struct linked_list* head;
-  struct linked_list* tail;
+  struct list_node* head;
+  struct list_node* tail;
 };
 
 
@@ -35,6 +35,6 @@ struct my_list* list_new(void);
 struct my_list* list_free( struct my_list* );
 
 void list_print( const struct my_list* );
-void list_print_element(const struct linked_list* );
+void list_print_element(const struct list_node* );
 
 #endif /* LINKEDLIST_H_ */

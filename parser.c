@@ -187,8 +187,6 @@ void parseFile(char *fileName)
 				printf("Signal was indeed deleted from tree");
 			}
 			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
-			free(signalID);
-
 		}
 	}
 	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree

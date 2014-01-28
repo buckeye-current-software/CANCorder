@@ -422,4 +422,6 @@ void delete_node(tree *t, void *data);
 */
 int get_data(tree *t, void *data, size_t data_size);
 
+struct signal_node * get_signal(tree *t, void *data, size_t data_size);
+
 #endif

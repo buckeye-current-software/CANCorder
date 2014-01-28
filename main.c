@@ -47,7 +47,7 @@ int main()
 	parseFile(fileName);
 
 	FILE *f;
-	f = fopen("log.txt", "w");
+	f = fopen("log.csv", "w");
 	if(f == NULL)
 	{
 		printf("Error opening file!\n");
@@ -68,11 +68,12 @@ int main()
 	addr.can_ifindex = ifr.ifr_ifindex;
 	bind(s, (struct sockaddr *)&addr, sizeof(addr));
 
+	int msgsRecv = 0; // Performance benchmark
+
 	while(1){
 		time(&cur_time);
-
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		printf("nbytes: %i", nbytes);
+		nbytes = read(s, &frame, sizeof(struct can_frame)); //This will flat out stop the program until a message is received
+		//printf("nbytes: %i", nbytes);
 		if (nbytes < 0)
 		{
 			perror("can raw socket read");
@@ -80,7 +81,8 @@ int main()
 		}
 		if (nbytes > 0)
 		{
-			printf("About to translate\n");
+			printf("%d\n", msgsRecv);
+			msgsRecv++;
 			translate(msg_tree, signal_tree, &frame);
 		}
 		else {
@@ -92,11 +94,13 @@ int main()
 			data_log(signal_tree, f);
 			fflush(f); 						     // Perhaps we should flush once every ~5 seconds to minimize a slow down
 			time(&prev_time);
+			//printf("Logged\n");
 		}
 
 	}
 
 	fclose(f);
+	close(s);
 
 	return 0;
 }

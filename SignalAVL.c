@@ -17,13 +17,12 @@ int data_cmp_sig(void *a, void *b)
 {
     struct signal_node *aa = (struct signal_node *) a;
     struct signal_node *bb = (struct signal_node *) b;
-    int result;
 
     // Protect against NULL pointer
     // It could generally never happened
     if (!aa || !bb)
         return 0;
-    printf("Key 1: %s ---- Key 2: %s\n", aa->key, bb->key);
+    //printf("Key 1: %s ---- Key 2: %s\n", aa->key, bb->key);
     return strcmp(aa->key, bb->key);
 }
 

@@ -793,6 +793,26 @@ int get_data_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *
 
 }
 
+void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *, void *))
+{
+	int cmp = 0;
+
+	if (n == NULL)
+		return NULL;
+
+	cmp = data_cmp(n->data, data);
+	if (cmp == 0) {
+	 // Current node is the good node, copy it.
+		return n->data;
+	} else if (cmp > 0) {
+	// Need to go deep in the left subtree.
+		return get_signal_recur(n->left, data, data_size, data_cmp);
+	} else {
+	// Need to go deep in the right subtree.
+		return get_signal_recur(n->right, data, data_size, data_cmp);
+	}
+}
+
 /** \fn int stub__data_cmp(void *a, void *b)
 * \brief Stub function used if no data_cmp functio is provided.
 *
@@ -945,7 +965,7 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
     // check if data is already present
     if (is_present(t, data))
     {
-    	printf("Data is already present");
+    	//printf("Data is already present");
         return t->count;
     }
     // Allocate memory for the new data and copy data.
@@ -961,11 +981,11 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
     // increment counter of element if so.
     if (!present) {
         DLOG("New data was added.\n");
-        printf("New data was added.\n");
+        //printf("New data was added.\n");
         return ++t->count;
     } else {
         DLOG("Data was updated.\n");
-        printf("Data was updated.\n");
+        //printf("Data was updated.\n");
         return t->count;
     }
 }
@@ -1149,3 +1169,12 @@ int get_data(tree *t, void *data, size_t data_size)
     return get_data_recur(t->root, data, data_size, t->data_cmp);
 }
 
+struct signal_node * get_signal(tree *t, void *data, size_t data_size)
+{
+	if (t == NULL)
+		return NULL;
+	if (t->root == NULL)
+	    return NULL;
+
+	return get_signal_recur(t->root, data, data_size, t->data_cmp);
+}

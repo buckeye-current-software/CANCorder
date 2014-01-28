@@ -24,7 +24,7 @@ void node_to_file(void *n, void *param)
 {
 	struct signal_node *data = (struct signal_node *) n;
 	FILE *f = (FILE *)param;
-	fprintf(f, "%f,", data->value);
+	fprintf(f, "%g,", data->value);
 }
 
 void data_log(tree *signal_tree, FILE *f)

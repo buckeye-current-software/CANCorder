@@ -52,9 +52,9 @@ void parseFile(char *fileName)
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
 
 				// Frees memory from the linked_list after it has been copied and storied into message_avl
-				list_free(signal_linked_list);
-				free(signal_linked_list);
-				signal_linked_list = NULL;
+				//list_free(signal_linked_list);
+				//free(signal_linked_list);			These three lines destroy the list stored in the message tree. Just don't use?
+				//signal_linked_list = NULL;
 			}
 			first_insert_skipped = 1; // Start adding messages to tree after first msg in file found and skipped
 
@@ -155,12 +155,10 @@ void parseFile(char *fileName)
 			{
 				msg.list = signal_linked_list;
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-				list_free(signal_linked_list);
-				free(signal_linked_list);
-				signal_linked_list = NULL;
 				added_last_msg = 1;
 			}
 			index = 15;
+			memset(tmp,0,strlen(tmp));
 			while(buf[index] != ' ')
 			{
 				tmp[index-15] = buf[index];
@@ -168,12 +166,13 @@ void parseFile(char *fileName)
 			}
 			tmp[index] = '\0';
 			tmpLength = strlen(tmp)+1;
-			signalID =(char*)malloc(tmpLength * sizeof(char));
+			//signalID =(char*)malloc(tmpLength * sizeof(char));
 			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
+			//strcpy(signalID, tmp);
 			strcpy(sig_node.key, tmp);
 
 			get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-
+			delete_node(signal_tree, &sig_node);
 			index = index + 3;
 			if(buf[index] == '1')
 			{
@@ -183,6 +182,11 @@ void parseFile(char *fileName)
 			{
 				sig_node.signal.dataType = 4;
 			}
+			if (!is_present(signal_tree, &sig_node))
+			{
+				printf("Signal was indeed deleted from tree");
+			}
+			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
 			free(signalID);
 
 		}

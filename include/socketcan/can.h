@@ -15,7 +15,9 @@
 
 #include <linux/version.h>
 #include <linux/types.h>
+
 #include <linux/socket.h>
+#include <linux/netlink.h>
 
 /* controller area network (CAN) kernel definitions */
 

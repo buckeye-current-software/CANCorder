@@ -10,6 +10,6 @@
 
 #include "avl.h"
 
-void translate(tree *signal_tree, struct *canfd_frame);
+void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame);
 
 #endif /* TRANSLATOR_H_ */

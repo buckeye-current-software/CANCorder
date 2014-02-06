@@ -9,11 +9,13 @@
 #define SIGNALAVL_H_
 
 #include "signal.h"
+#include <pthread.h>
 
 struct signal_node {
 	char *key;
 	struct signal_structure signal; // I think this isn't needed
 	double value;
+	pthread_mutex_t lock;
 };
 
 int data_cmp_sig(void *a, void *b);

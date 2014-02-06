@@ -1,0 +1,300 @@
+VERSION "HIPBNYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY/4/%%%/4/'%**4YYY///"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+
+BS_:
+
+BU_: RMS_PM_Controller
+
+BO_ 1 M1: 8 RMS_PM_Controller1
+ SG_ D4_Iq_Command : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D3_Id_Command : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D2_Flux_Weakening_Output : 16|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D1_Modulation_Index : 0|16@1+ (0.01,0) [0|0] "" Vector__XXX
+
+BO_ 2 M2: 8 RMS_PM_Controller2
+ SG_ B3_Power_On_Timer : 32|32@1+ (0.003,0) [0|4.29497e+009] "Sec" Vector__XXX
+ SG_ B2_Torque_Feedback : 16|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ B1_Commanded_Torque : 0|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+
+BO_ 3 M3: 8 RMS_PM_Controller3
+ SG_ B2_Write_Success : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Data_Response : 32|16@1- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ B1_Parameter_Address_Response : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 4 M4: 8 Vector__XXX4
+ SG_ B3_Data_Command : 32|16@1- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ B2_Read_Write_Command : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B1_Parameter_Address_Command : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 5 M5: 6 Vector__XXX5
+ SG_ BInverter_Enable : 40|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+ SG_ BDirection_Command : 32|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+ SG_ BSpeed_Command : 16|16@1- (1,0) [-32768|32767] "rpm" Vector__XXX
+ SG_ BTorque_Command : 0|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ BInverter_Discharge : 33|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+
+BO_ 6 M6: 8 RMS_PM_Controller6
+ SG_ B4_Run_Fault_Hi : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B2_Post_Fault_Hi : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B3_Run_Fault_Lo : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B1_Post_Fault_Lo : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 7 M7: 8 RMS_PM_Controller7
+ SG_ B7_Direction_Command : 56|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B6_Inverter_Enable_State : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_3_Status : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_4_Status : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_2_Status : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B4_Inverter_Run_Mode : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B5_Inverter_Command_Mode : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_1_Status : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B2_Inverter_State : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B1_VSM_State : 0|16@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ B0_Inverter_Enable_Lockout : 55|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 8 M8: 8 RMS_PM_Controller8
+ SG_ B4_Reference_Voltage_12_0 : 48|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B3_Reference_Voltage_5_0 : 32|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B2_Reference_Voltage_2_5 : 16|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B1_Reference_Voltage_1_5 : 0|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+
+BO_ 9 M9: 8 RMS_PM_Controller9
+ SG_ B4_Iq3 : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B3_Id3 : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B2_Flux_Feedback3 : 16|16@1- (0.001,0) [-32.768|32.767] "Wb" Vector__XXX
+ SG_ B1_Flux_Command3 : 0|16@1- (0.001,0) [-32.768|32.767] "Wb" Vector__XXX
+
+BO_ 10 M10: 8 RMS_PM_Controller10
+ SG_ B4_Phase_BC_Voltage4 : 48|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B3_Phase_AB_Voltage4 : 32|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B2_Output_Voltage4 : 16|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B1_DC_Bus_Voltage4 : 0|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+
+BO_ 11 M11: 8 RMS_PM_Controller11
+ SG_ B4_DC_Bus_Current5 : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B3_Phase_C_Current5 : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B2_Phase_B_Current5 : 16|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B1_Phase_A_Current5 : 0|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+
+BO_ 12 M12: 8 RMS_PM_Controller12
+ SG_ B4_Delta_Resolver_Filtered5 : 48|16@1- (0.1,0) [-3276.8|3276.7] "deg" Vector__XXX
+ SG_ B3_Electrical_Output_Frequency5 : 32|16@1- (0.1,0) [-3276.8|3276.7] "hz" Vector__XXX
+ SG_ B2_Motor_Speed5 : 16|16@1- (1,0) [-32768|32767] "rpm" Vector__XXX
+ SG_ B1_Motor_Angle_Electrical5 : 0|16@1+ (0.1,0) [0|6553.5] "deg" Vector__XXX
+
+BO_ 13 M13: 6 RMS_PM_Controller13
+ SG_ B6_Digital_Input_65 : 40|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B5_Digital_Input_55 : 32|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B4_Digital_Input_45 : 24|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B3_Digital_Input_35 : 16|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B2_Digital_Input_25 : 8|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B1_Digital_Input_15 : 0|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+
+BO_ 14 M14: 8 RMS_PM_Controller14
+ SG_ B4_Analog_Input_43 : 48|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B3_Analog_Input_33 : 32|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B2_Analog_Input_23 : 16|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B1_Analog_Input_13 : 0|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+
+BO_ 15 M15: 8 RMS_PM_Controller15
+ SG_ B4_Torque_Shudder6 : 48|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ B3_Motor_Temperature6 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_RTD5_Temperature6 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_RTD4_Temperature6 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 16 M16: 8 RMS_PM_Controller16
+ SG_ B4_RTD3_Temperature7 : 48|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B3_RTD2_Temperature7 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_RTD1_Temperature7 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_Control_Board_Temperature7 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 17 M17: 8 RMS_PM_Controller17
+ SG_ B4_Gate_Driver_Board7 : 48|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B3_Module_C7 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_Module_B7 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_Module_A7 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 18 M18: 8 RMS_PM_Controller18
+ SG_ B1_Project_Code_EEP_Ver7 : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B2_SW_Version7 : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B3_DateCode_MMDD7 : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B4_DateCode_YYYY7 : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 19 M19: 8 RMS_PM_Controller19
+ SG_ B1_Buffer_Record7 : 0|8@1+ (1,0) [0|160] "" Vector__XXX
+ SG_ B2_Buffer_Segment7 : 8|8@1+ (1,0) [0|5] "" Vector__XXX
+ SG_ B3_Diag_Data_17 : 16|16@1- (1,0) [0|65535] "" Vector__XXX
+ SG_ B4_Diag_Data_27 : 32|16@1- (1,0) [0|65535] "" Vector__XXX
+ SG_ B5_Diag_Data_37 : 48|16@1- (1,0) [0|65535] "" Vector__XXX
+
+BO_ 20 M20: 8 RMS_PM_Controller20
+ SG_ B1_ID_Byte7 : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B2_Setpoint_Calc7 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 21 M21: 8 Vector__XXX21
+ SG_ B1_HV_Input_Current_Sensor_Validity7 : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B2_14V_Master_Fault1 : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_HV_Input_Current1 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B4_DTC_Status1 : 16|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ B5_DTC_Index1 : 19|5@1+ (1,0) [0|31] "" Vector__XXX
+ SG_ B6_14V_Monitor1 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B7_14V_Conditional1 : 39|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B8_14V_Current_Monitor1 : 48|7@1+ (1,0) [0|127] "" Vector__XXX
+
+BO_ 22 M22: 8 RMS_PM_Controller22
+ SG_ B4_Iq_Command2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B3_Id_Command2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B2_Flux_Weakening_Output2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B1_Modulation_Index2 : 0|16@1+ (0.01,0) [0|0] "" Vector__XXX
+
+BO_ 23 M23: 8 RMS_PM_Controller23
+ SG_ B3_Power_On_Timer2 : 32|32@1+ (0.003,0) [0|4.29497e+009] "Sec" Vector__XXX
+ SG_ B2_Torque_Feedback2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ B1_Commanded_Torque2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+
+BO_ 24 M24_Read_Write_Param_Response: 8 RMS_PM_Controller24
+ SG_ B2_Write_Success2 : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Data_Response2 : 32|16@1- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ B1_Parameter_Address_Response2 : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 25 M25: 8 Vector__XXX25
+ SG_ B3_Data_Command2 : 32|16@1- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ B2_Read_Write_Command2 : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B1_Parameter_Address_Command2 : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 26 M26: 6 Vector__XXX26
+ SG_ BInverter_Enable2 : 40|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+ SG_ BDirection_Command2 : 32|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+ SG_ BSpeed_Command2 : 16|16@1- (1,0) [-32768|32767] "rpm" Vector__XXX
+ SG_ BTorque_Command2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ BInverter_Discharge2 : 33|1@1+ (1,0) [0|1] "Bit" Vector__XXX
+
+BO_ 27 M27_Fault_Codes: 8 RMS_PM_Controller27
+ SG_ B4_Run_Fault_Hi2 : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B2_Post_Fault_Hi2 : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B3_Run_Fault_Lo2 : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B1_Post_Fault_Lo2 : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 28 M28: 8 RMS_PM_Controller
+ SG_ B7_Direction_Command2 : 56|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B6_Inverter_Enable_State2 : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_3_Status2 : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_4_Status2 : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_2_Status2 : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B4_Inverter_Run_Mode2 : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B5_Inverter_Command_Mode2 : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_Relay_1_Status2 : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B2_Inverter_State2 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B1_VSM_State2 : 0|16@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ B6_Inverter_Enable_Lockout2 : 55|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 29 M29: 8 RMS_PM_Controller
+ SG_ B4_Reference_Voltage_12_02 : 48|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B3_Reference_Voltage_5_02 : 32|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B2_Reference_Voltage_2_52 : 16|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B1_Reference_Voltage_1_52 : 0|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+
+BO_ 30 M30: 8 RMS_PM_Controller
+ SG_ B4_Iq2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B3_Id2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ B2_Flux_Feedback2 : 16|16@1- (0.001,0) [-32.768|32.767] "Wb" Vector__XXX
+ SG_ B1_Flux_Command2 : 0|16@1- (0.001,0) [-32.768|32.767] "Wb" Vector__XXX
+
+BO_ 31 M31: 8 RMS_PM_Controller
+ SG_ B4_Phase_BC_Voltage2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B3_Phase_AB_Voltage2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B2_Output_Voltage2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+ SG_ B1_DC_Bus_Voltage2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "V" Vector__XXX
+
+BO_ 32 M32: 8 RMS_PM_Controller
+ SG_ D4_DC_Bus_Current2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D3_Phase_C_Current2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D2_Phase_B_Current2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ D1_Phase_A_Current2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+
+BO_ 33 M33_Motor_Position_Info: 8 RMS_PM_Controller
+ SG_ B4_Delta_Resolver_Filtered2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "deg" Vector__XXX
+ SG_ B3_Electrical_Output_Frequency2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "hz" Vector__XXX
+ SG_ B2_Motor_Speed2 : 16|16@1- (1,0) [-32768|32767] "rpm" Vector__XXX
+ SG_ B1_Motor_Angle_Electrical2 : 0|16@1+ (0.1,0) [0|6553.5] "deg" Vector__XXX
+
+BO_ 34 M34_Digital_Input_Status: 6 RMS_PM_Controller
+ SG_ B6_Digital_Input_62 : 40|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B5_Digital_Input_52 : 32|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B4_Digital_Input_42 : 24|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B3_Digital_Input_32 : 16|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B2_Digital_Input_22 : 8|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+ SG_ B1_Digital_Input_12 : 0|1@1+ (1,0) [0|1] "boolean" Vector__XXX
+
+BO_ 35 M35_Analog_Input_Voltages: 8 RMS_PM_Controller
+ SG_ B4_Analog_Input_42 : 48|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B3_Analog_Input_32 : 32|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B2_Analog_Input_22 : 16|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+ SG_ B1_Analog_Input_12 : 0|16@1- (0.01,0) [-327.68|327.67] "V" Vector__XXX
+
+BO_ 36 M36_Temperature_Set_3: 8 RMS_PM_Controller
+ SG_ B4_Torque_Shudder2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+ SG_ B3_Motor_Temperature2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_RTD5_Temperature2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_RTD4_Temperature2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 37 M37_Temperature_Set_2: 8 RMS_PM_Controller
+ SG_ B4_RTD3_Temperature2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B3_RTD2_Temperature2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_RTD1_Temperature2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_Control_Board_Temperature2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 38 M38_Temperature_Set_1: 8 RMS_PM_Controller
+ SG_ B4_Gate_Driver_Board2 : 48|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B3_Module_C2 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B2_Module_B2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+ SG_ B1_Module_A2 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" Vector__XXX
+
+BO_ 39 M39_Firmware_Info: 8 RMS_PM_Controller
+ SG_ B1_Project_Code_EEP_Ver2 : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B2_SW_Version2 : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B3_DateCode_MMDD2 : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ B4_DateCode_YYYY2 : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 40 M40_Diag_Data: 8 RMS_PM_Controller
+ SG_ B1_Buffer_Record2 : 0|8@1+ (1,0) [0|160] "" Vector__XXX
+ SG_ B2_Buffer_Segment2 : 8|8@1+ (1,0) [0|5] "" Vector__XXX
+ SG_ B3_Diag_Data_12 : 16|16@1- (1,0) [0|65535] "" Vector__XXX
+ SG_ B4_Diag_Data_22 : 32|16@1- (1,0) [0|65535] "" Vector__XXX
+ SG_ B5_Diag_Data_32 : 48|16@1- (1,0) [0|65535] "" Vector__XXX
+
+BO_ 41 M41_U2C_Command_Txd: 8 RMS_PM_Controller
+ SG_ B1_ID_Byte2 : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B2_Setpoint_Calc2 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 42 M42_U2C_Message_Rxd: 8 Vector__XXX
+ SG_ B1_HV_Input_Current_Sensor_Validity2 : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B2_14V_Master_Fault2 : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B3_HV_Input_Current2 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B4_DTC_Status2 : 16|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ B5_DTC_Index2 : 19|5@1+ (1,0) [0|31] "" Vector__XXX
+ SG_ B6_14V_Monitor2 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ B7_14V_Conditional2 : 39|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ B8_14V_Current_Monitor2 : 48|7@1+ (1,0) [0|127] "" Vector__XXX

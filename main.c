@@ -10,9 +10,11 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <time.h>
-
+#include <pthread.h>
+#include <semaphore.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <signal.h>
 
 
 #include <sys/socket.h>
@@ -35,27 +37,84 @@
 
 tree *msg_tree;
 tree *signal_tree;
+sem_t semaphore;
+FILE *f;
+char logString[15];
 
-int main()
+int keepRunning = 1;
+
+void my_handler(int dummy) {
+    keepRunning = 0;
+}
+
+void *txcanthread(int cansock) {
+
+	struct can_frame txmsg;
+	// New line after all signals generated as headers
+	while(1)
+	{
+		sleep(1);
+		txmsg.can_id  = 0x123;
+		txmsg.can_dlc = 0;
+
+		write(cansock, &txmsg, sizeof(struct can_frame));
+	}
+	return NULL;
+}
+
+void *logthread()
 {
-	msg_tree = initialize_msg_avl();
-	signal_tree = initialize_signal_avl();
-	time_t cur_time, prev_time;
-	time(&prev_time);
+	int logNum = 1;
+	char lognumstr[4];
+	sprintf(lognumstr, "%d", logNum);
+	strcpy(logString, "log");
+	strcat(logString, lognumstr);
+	strcat(logString, ".csv");
+	while(access(logString, F_OK ) != -1)
+	{
+		logNum ++;
+		sprintf(lognumstr, "%d", logNum);
+		strcpy(logString, "log");
+		strcat(logString, lognumstr);
+		strcat(logString, ".csv");
+	}
 
-	char *fileName = "test2.dbc";
-	parseFile(fileName);
-
-	FILE *f;
-	f = fopen("log.csv", "w");
+	f = fopen(logString, "w");
 	if(f == NULL)
 	{
 		printf("Error opening file!\n");
 		exit(1);
 	}
-
+	fprintf(f, "Runtime,System_Time,");
 	explore_tree(signal_tree, insert_headers, f); //Generates headers once (can change to once in so many lines written)
-	fprintf(f, "\n"); 							  // New line after all signals generated as headers
+	fprintf(f, "\n");
+	while(1)
+	{
+		usleep(25000);
+		data_log(signal_tree);
+		fflush(f);
+		printf("Logged\n");
+	}
+	fclose(f);
+	return NULL;
+}
+
+int main()
+{
+	struct sigaction sigIntHandler;
+
+	sigIntHandler.sa_handler = my_handler;
+	sigemptyset(&sigIntHandler.sa_mask);
+	sigIntHandler.sa_flags = 0;
+
+	sigaction(SIGINT, &sigIntHandler, NULL);
+
+
+	msg_tree = initialize_msg_avl();
+	signal_tree = initialize_signal_avl();
+
+	char *fileName = "newtest.dbc";
+	parseFile(fileName);
 
 	struct can_frame frame;
 	int s, nbytes;
@@ -68,15 +127,21 @@ int main()
 	addr.can_ifindex = ifr.ifr_ifindex;
 	bind(s, (struct sockaddr *)&addr, sizeof(addr));
 
-	int msgsRecv = 0; // Performance benchmark
+	sem_init(&semaphore, 0, 1);
+	pthread_t txthread, logging;
+	pthread_create(&txthread, NULL, txcanthread, s);
+	pthread_create(&logging, NULL, logthread, NULL);
 
-	while(1){
-		time(&cur_time);
+	int msgsRecv = 0;
+
+	while(keepRunning){
 		nbytes = read(s, &frame, sizeof(struct can_frame)); //This will flat out stop the program until a message is received
 		//printf("nbytes: %i", nbytes);
 		if (nbytes < 0)
 		{
 			perror("can raw socket read");
+			delete_tree(signal_tree);
+			delete_tree(msg_tree);
 			return 1;
 		}
 		if (nbytes > 0)
@@ -85,22 +150,9 @@ int main()
 			msgsRecv++;
 			translate(msg_tree, signal_tree, &frame);
 		}
-		else {
-			printf("Not translating. Nbytes = %d\n", nbytes);
-		}
-
-		if((int)cur_time-(int)prev_time >= 1)    // Once every second...
-		{
-			data_log(signal_tree, f);
-			fflush(f); 						     // Perhaps we should flush once every ~5 seconds to minimize a slow down
-			time(&prev_time);
-			//printf("Logged\n");
-		}
-
 	}
-
-	fclose(f);
 	close(s);
-
+	delete_tree(signal_tree);
+	delete_tree(msg_tree);
 	return 0;
 }

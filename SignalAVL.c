@@ -24,6 +24,7 @@ int data_cmp_sig(void *a, void *b)
         return 0;
     //printf("Key 1: %s ---- Key 2: %s\n", aa->key, bb->key);
     return strcmp(aa->key, bb->key);
+
 }
 
 // Function that dumps data structure

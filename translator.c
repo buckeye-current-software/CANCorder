@@ -18,6 +18,7 @@
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <net/if.h>
+#include <semaphore.h>
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
@@ -45,24 +46,28 @@ union byteData
   double_t DOUBLE;
 } byteData;
 
+extern sem_t semaphore;
+
 void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 
+	uint8_t frameLength = frame->can_dlc;
 	int msgID = (int)frame->can_id;
 	int i;
-	__u8 tempArray[8];
+
+	// May be able to simply make the array lengths variable (frame length)
+	__u8 tempArray[frameLength];
 	uint64_t bitmask = 0;
-	__u8 origFrameData[8];
-	memcpy(&origFrameData, &frame->data[0], 8);
+	__u8 origFrameData[frameLength];
+	memcpy(&origFrameData, &frame->data[0], frameLength);
 
 	struct message_node msg_node;
 
 	struct signal_node sig_node;
 	struct signal_structure signal;
-	struct list_node *node, *nextNode;
+	struct list_node *node;
 	msg_node.key = (char*)malloc(msgID * sizeof(char));
 	//msg_node.key = "0";
 	sprintf(msg_node.key, "%d", msgID);
-
 
 	if(is_present(message_tree, &msg_node))
 	{
@@ -73,8 +78,8 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 		//nextNode = node->next;
 		while(node != NULL)
 		{
-			memcpy(&frame->data, &origFrameData[0], 8);
-			memcpy(&byteData.U64, &frame->data[0], 8);
+			memcpy(&frame->data, &origFrameData[0], frameLength);
+			memcpy(&byteData.U64, &frame->data[0], frameLength);
 
 			sig_node.key = (char*)malloc(*signal.id * sizeof(char));
 			strcpy(sig_node.key, signal.id);
@@ -86,12 +91,12 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				//Reverse the byte array or start index at end and decrement
 				for(i = 0; i < 8; i++)
 				{
-					tempArray[7-i] = frame->data[i];
+					tempArray[(frameLength-1)-i] = frame->data[i];
 				}
-				memcpy(&frame->data,&tempArray[0], 8);
+				memcpy(&frame->data,&tempArray[0], frameLength);
 			}
 
-			memcpy(&byteData.U64, &frame->data[0], 8); // Obtain data and store in union
+			memcpy(&byteData.U64, &frame->data[0], frameLength); // Obtain data and store in union
 			byteData.U64 = byteData.U64 >> signal.startBit; // Get relevant signal data
 			//Create bitmask
 			bitmask = 0;
@@ -106,14 +111,16 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 			signal.dataType = sig_node.signal.dataType; // Due to signals.dataType being different between msg_tree and sig_tree
 
 			//printf("Data type = %d\n", signal.dataType);
-
+			sem_wait(&semaphore);
 			if(signal.dataType == 1) // Signed int
 			{
 				if(signal.length <= 8)
 				{
 					if(signal.length == 8)
 					{
+
 						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I8;
+
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					}
 					else
@@ -236,6 +243,7 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = byteData.DOUBLE;
 				//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 			}
+			sem_post(&semaphore);
 
 			if(node->next != NULL)
 			{

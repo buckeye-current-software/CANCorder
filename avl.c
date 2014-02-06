@@ -825,7 +825,7 @@ void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (v
 */
 int stub__data_cmp(void *a, void *b)
 {
-    return (int) ((ptrdiff_t) a - (ptrdiff_t) b);
+    //return (int) ((ptrdiff_t) a - (ptrdiff_t) b);
 }
 
 /** \fn void stub__data_print(void *d)
@@ -959,6 +959,7 @@ tree *init_dictionnary(int (*data_cmp)(void *, void *),
 */
 unsigned int insert_elmt(tree *t, void *data, size_t datasize)
 {
+
     node to_add = NULL;
     int present = 0;
 
@@ -1000,6 +1001,7 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
 */
 void verif_tree(tree *t)
 {
+
     if (t == NULL)
         return;
     if (t->root == NULL)

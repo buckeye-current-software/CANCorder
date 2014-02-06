@@ -151,12 +151,6 @@ void parseFile(char *fileName)
 
 		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
 		{
-			if(added_last_msg == 0)
-			{
-				msg.list = signal_linked_list;
-				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-				added_last_msg = 1;
-			}
 			index = 15;
 			memset(tmp,0,strlen(tmp));
 			while(buf[index] != ' ')
@@ -189,6 +183,10 @@ void parseFile(char *fileName)
 			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
 		}
 	}
+	msg.list = signal_linked_list;
+	insert_elmt(msg_tree, &msg, sizeof(struct message_node));
+	added_last_msg = 1;
+
 	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
 	print_tree(msg_tree);
 	fprintf(stdout, "Signal Tree: \n");

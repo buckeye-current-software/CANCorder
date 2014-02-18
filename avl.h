@@ -424,6 +424,8 @@ int get_data(tree *t, void *data, size_t data_size);
 
 struct signal_node * get_signal(tree *t, void *data, size_t data_size);
 
+struct message_node * get_message(tree *t, void *data, size_t data_size);
+
 int initialize_pthread_lock();
 
 #endif

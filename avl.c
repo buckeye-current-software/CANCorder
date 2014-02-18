@@ -781,7 +781,7 @@ int get_data_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *
     cmp = data_cmp(n->data, data);
     if (cmp == 0) {
         // Current node is the good node, copy it.
-        memcpy(data, n->data, data_size);
+        memcpy(data, n->data, data_size); // The problem line...
         return 1;
     } else if (cmp > 0) {
         // Need to go deep in the left subtree.
@@ -798,11 +798,11 @@ void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (v
 	int cmp = 0;
 
 	if (n == NULL)
+	{
 		return NULL;
-
+	}
 	cmp = data_cmp(n->data, data);
 	if (cmp == 0) {
-	 // Current node is the good node, copy it.
 		return n->data;
 	} else if (cmp > 0) {
 	// Need to go deep in the left subtree.
@@ -1174,9 +1174,25 @@ int get_data(tree *t, void *data, size_t data_size)
 struct signal_node * get_signal(tree *t, void *data, size_t data_size)
 {
 	if (t == NULL)
+	{
 		return NULL;
+	}
 	if (t->root == NULL)
+	{
 	    return NULL;
+	}
+	return get_signal_recur(t->root, data, data_size, t->data_cmp);
+}
 
+struct message_node * get_message(tree *t, void *data, size_t data_size)
+{
+	if (t == NULL)
+	{
+		return NULL;
+	}
+	if (t->root == NULL)
+	{
+	    return NULL;
+	}
 	return get_signal_recur(t->root, data, data_size, t->data_cmp);
 }

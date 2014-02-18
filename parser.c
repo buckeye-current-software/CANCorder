@@ -15,9 +15,12 @@
 
 extern tree *msg_tree;
 extern tree *signal_tree;
+int maxSignalSize;
+
 
 void parseFile(char *fileName)
 {
+	maxSignalSize = 0;
 	FILE *file;
 	/* Open file handler using fileName in read mode */
 	file = fopen(fileName, "r");
@@ -39,7 +42,7 @@ void parseFile(char *fileName)
 	struct signal_node sig_node; // The nodes that will go into the signal AVL tree
 	struct signal_structure sig; // An actual signal structure
 	//msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
-	
+	//int msgNodes = 0, signalNodes = 0;
 	
 	while(fgets(buf,BUFSIZ,file) != NULL)
 	{
@@ -84,6 +87,10 @@ void parseFile(char *fileName)
 
 			// Allocate smallest char array possible to store signal_ID
 			tmpLength = strlen(tmp)+1;
+			if(tmpLength > maxSignalSize)
+			{
+				maxSignalSize = tmpLength;
+			}
 			signalID =(char*)malloc(tmpLength * sizeof(char));
 			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
 			sig.id = (char*)malloc(tmpLength * sizeof(char));

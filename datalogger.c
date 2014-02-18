@@ -19,12 +19,13 @@
 #include "avl.h"
 
 struct timeval start_tv, now_tv, new_tv, old_tv;
-double system_time;
+double prev_system_time;
 int headers_logged = 0, renamed = 0;
-struct signal_node sig_node;
-extern sem_t semaphore;
+struct signal_node sig_node_key;
+struct signal_node * sig_node;
+extern sem_t semaphore, free_semaphore, malloc_semaphore;
 extern FILE *f;
-extern char logString;
+extern char logString[15];
 time_t rawtime;
 struct tm * timeinfo;
 
@@ -43,20 +44,24 @@ void node_to_file(void *n, void *param)
 
 void data_log(tree *signal_tree)
 {
-	sig_node.key = (char*)malloc(20 * sizeof(char));
-	strcpy(sig_node.key, "GPS_validity_status");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	if(sig_node.value == 1)
+	sem_wait(&malloc_semaphore);
+	sig_node_key.key = (char*)malloc(20 * sizeof(char));
+	sem_post(&malloc_semaphore);
+
+	strcpy(sig_node_key.key, "GPS_validity_status");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	if(sig_node != NULL && sig_node->value == 1)
 	{
 		if(renamed == 0)
 		{
+			printf("About to change shit");
 			rename_log(signal_tree);
+			renamed = 1;
 		}
 	}
 	gettimeofday(&now_tv, NULL);
 	// Prints runtime
-	fprintf(f, "%g,", (double) (now_tv.tv_usec - start_tv.tv_usec) / 1000000 +
-	         (double) ((now_tv.tv_sec-old_tv.tv_sec) - start_tv.tv_sec));
+	fprintf(f, "%g,", (double) (now_tv.tv_usec - start_tv.tv_usec) / 1000000 + (double) (now_tv.tv_sec - start_tv.tv_sec) + prev_system_time);
 	// Prints system time
 	time (&rawtime);
 	timeinfo = localtime (&rawtime);
@@ -66,61 +71,67 @@ void data_log(tree *signal_tree)
 	explore_tree(signal_tree, node_to_file, f);
 	sem_post(&semaphore);
 	fprintf(f, "\n");
+	sem_wait(&free_semaphore);
+	free(sig_node_key.key);
+	sem_post(&free_semaphore);
 }
 
 void rename_log(tree *signal_tree)
 {
-	char fileName[18] = "", value[5];
+	char fileName[22] = "", value[5];
 	// Obtain Y, M, D, H, M, S for tree, store in something local
 	int year, month, day, hour, minute, seconds;
-	strcpy(sig_node.key, "Year");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	year = sig_node.value;
+	strcpy(sig_node_key.key, "Years");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	year = sig_node->value;
 	sprintf(value, "%d", year);
 	strcat(fileName, value);
 	strcat(fileName, "-");
 
-	strcpy(sig_node.key, "Month");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	month = sig_node.value;
+	strcpy(sig_node_key.key, "Month");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	month = sig_node->value;
 	sprintf(value, "%d", month);
 	strcat(fileName, value);
 	strcat(fileName, "-");
 
-	strcpy(sig_node.key, "Day");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	day = sig_node.value;
+	strcpy(sig_node_key.key, "Day");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	day = sig_node->value;
 	sprintf(value, "%d", day);
 	strcat(fileName, value);
 	strcat(fileName, "--");
 
-	strcpy(sig_node.key, "Hour");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	hour = sig_node.value;
+	strcpy(sig_node_key.key, "Hours");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	hour = sig_node->value;
 	sprintf(value, "%d", hour);
 	strcat(fileName, value);
 	strcat(fileName, "-");
 
-	strcpy(sig_node.key, "Minute");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	minute = sig_node.value;
+	strcpy(sig_node_key.key, "Minutes");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	minute = sig_node->value;
 	sprintf(value, "%d", minute);
 	strcat(fileName, value);
+	strcat(fileName, ".csv");
 
-	//strcpy(sig_node.key, "Second");
-	get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-	seconds = sig_node.value;
+	strcpy(sig_node_key.key, "Seconds");
+	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	seconds = sig_node->value;
 	//sprintf(value, "%d", seconds);
 	//strcat(fileName, value);
-
-	new_tv.tv_sec = year*31556900 + month*2629740 + day*86400 + hour*3600 + minute*60 + seconds;
-	gettimeofday(&old_tv, NULL);
+	new_tv.tv_sec = ((year-1970)*31556900 + (month-1)*2629740 + (day-1)*86400 + hour*3600 + minute*60 + seconds);
+	prev_system_time = (double) (now_tv.tv_usec - start_tv.tv_usec) / 1000000 + (double) (now_tv.tv_sec - start_tv.tv_sec);
 	settimeofday(&new_tv, NULL);
+	gettimeofday(&start_tv, NULL);
+
 	//Final fileName format = 2014-2-1--15-36
 	fclose(f);
-	link(logString, fileName);
-	unlink(logString);
-	f = fopen(logString, "a");
+
+	printf("%s\n", logString);
+	rename(logString, fileName);
+	f = fopen(fileName, "a");
 }
 
 

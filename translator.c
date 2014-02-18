@@ -46,44 +46,55 @@ union byteData
   double_t DOUBLE;
 } byteData;
 
-extern sem_t semaphore;
+extern sem_t semaphore, free_semaphore, malloc_semaphore;
+extern int maxSignalSize;
 
 void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 
 	uint8_t frameLength = frame->can_dlc;
 	int msgID = (int)frame->can_id;
-	int i;
-
-	// May be able to simply make the array lengths variable (frame length)
+	int i;	// May be able to simply make the array lengths variable (frame length)
 	__u8 tempArray[frameLength];
 	uint64_t bitmask = 0;
 	__u8 origFrameData[frameLength];
 	memcpy(&origFrameData, &frame->data[0], frameLength);
 
-	struct message_node msg_node;
+	struct message_node msg_node_key;
+	struct message_node * msg_node;
 
-	struct signal_node sig_node;
+	struct signal_node sig_node_key;
+	struct signal_node * sig_node;
 	struct signal_structure signal;
 	struct list_node *node;
-	msg_node.key = (char*)malloc(msgID * sizeof(char));
+	sem_wait(&malloc_semaphore);
+	msg_node_key.key = (char*)malloc(msgID * sizeof(char));
+	sem_post(&malloc_semaphore);
 	//msg_node.key = "0";
-	sprintf(msg_node.key, "%d", msgID);
+	sprintf(msg_node_key.key, "%d", msgID);
 
-	if(is_present(message_tree, &msg_node))
+	if(is_present(message_tree, &msg_node_key))
 	{
 		//printf("Found message in tree");
-		get_data(message_tree, &msg_node, sizeof(struct message_node));
-		node = msg_node.list->head;
+		msg_node = get_message(message_tree, &msg_node_key, sizeof(struct message_node));
+		node = msg_node->list->head;
 		signal = node->signal;
+
+		sem_wait(&malloc_semaphore);
+		sig_node_key.key = (char*)malloc(maxSignalSize * sizeof(char));
+		sem_post(&malloc_semaphore);
+
 		//nextNode = node->next;
 		while(node != NULL)
 		{
 			memcpy(&frame->data, &origFrameData[0], frameLength);
 			memcpy(&byteData.U64, &frame->data[0], frameLength);
 
-			sig_node.key = (char*)malloc(*signal.id * sizeof(char));
-			strcpy(sig_node.key, signal.id);
-			get_data(signal_tree, &sig_node, sizeof(struct signal_node));
+			//Needs changed eventually to improve performance
+			//sig_node_key.key = (char*)malloc((strlen(signal.id)+1) * sizeof(char));
+			//&sig_node.key;
+			strcpy(sig_node_key.key, signal.id);
+			//get_data(signal_tree, &sig_node, sizeof(struct signal_node));
+			sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 
 			if(signal.byteOrder == 0) // May need changed. Look into this
 			{
@@ -106,11 +117,14 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 			byteData.U64 = byteData.U64 & bitmask;
 
 			//get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-			get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
+			//get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
 			//sig_node = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
-			signal.dataType = sig_node.signal.dataType; // Due to signals.dataType being different between msg_tree and sig_tree
+			signal.dataType = sig_node->signal.dataType; // Due to signals.dataType being different between msg_tree and sig_tree
 
 			//printf("Data type = %d\n", signal.dataType);
+			//printf("Storing data\n");
+			//printf("Accessing data: %s|\n", sig_node->key);
+			//printf("Data present in tree: %d\n", is_present(signal_tree, &sig_node));
 			sem_wait(&semaphore);
 			if(signal.dataType == 1) // Signed int
 			{
@@ -119,13 +133,14 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 					if(signal.length == 8)
 					{
 
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I8;
-
+						//get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I8;
+						sig_node->value = (double)byteData.I8;
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					}
 					else
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)((byteData.I8 << (8 - signal.length)) >> (8-signal.length));
+						//get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)((byteData.I8 << (8 - signal.length)) >> (8-signal.length));
+						sig_node->value = (double)((byteData.I8 << (8 - signal.length)) >> (8-signal.length));
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 						//sig_node.value = sig_node.value << (8 - signal.length); Can't do this because sig_node.value is a double
 						//sig_node.value = sig_node.value >> (8 - signal.length);
@@ -135,12 +150,12 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					if(signal.length == 16)
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I16;
+						sig_node->value = (double)byteData.I16;
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					}
 					else
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)((byteData.I16 << (16 - signal.length)) >> (16-signal.length));
+						sig_node->value = (double)((byteData.I16 << (16 - signal.length)) >> (16-signal.length));
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 						//sig_node.value = sig_node.value << (16 - signal.length);
 						//sig_node.value = sig_node.value >> (16 - signal.length);
@@ -151,12 +166,12 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					if(signal.length == 32)
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I32;
+						sig_node->value = (double)byteData.I32;
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					}
 					else
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)((byteData.I32 << (32 - signal.length)) >> (32-signal.length));
+						sig_node->value = (double)((byteData.I32 << (32 - signal.length)) >> (32-signal.length));
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 						//sig_node.value = sig_node.value << (32 - signal.length);
 						//sig_node.value = sig_node.value >> (32 - signal.length);
@@ -166,12 +181,12 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					if(signal.length == 64)
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.I64;
+						sig_node->value = (double)byteData.I64;
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					}
 					else
 					{
-						get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)((byteData.I64 << (64 - signal.length)) >> (64-signal.length));
+						sig_node->value = (double)((byteData.I64 << (64 - signal.length)) >> (64-signal.length));
 						//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 						//sig_node.value = sig_node.value << (64 - signal.length);
 						//sig_node.value = sig_node.value >> (64 - signal.length);
@@ -184,7 +199,7 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					//if(signal.length == 8)
 					//{
-					get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.U8;
+					sig_node->value = (double)byteData.U8;
 					//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					//}
 					//else
@@ -196,7 +211,7 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					//if(signal.length == 16)
 					//{
-					get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.U16;
+					sig_node->value = (double)byteData.U16;
 					//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					//}
 					//else
@@ -209,7 +224,7 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					//if(signal.length == 32)
 					//{
-					get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.U32;
+					sig_node->value = (double)byteData.U32;
 					//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					//}
 					//else
@@ -221,7 +236,7 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				{
 					//if(signal.length == 64)
 					//{
-					get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.U64;
+					sig_node->value = (double)byteData.U64;
 					//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 					//}
 				}
@@ -235,15 +250,16 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 				}
 
 				//printf("%g\n", (double)byteData.FLOAT);
-				get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = (double)byteData.FLOAT;
+				sig_node->value = (double)byteData.FLOAT;
 				//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 			}
 			else //Double
 			{
-				get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value = byteData.DOUBLE;
+				sig_node->value = byteData.DOUBLE;
 				//printf("Data: %g\n", get_signal(signal_tree, &sig_node, sizeof(struct signal_node))->value);
 			}
 			sem_post(&semaphore);
+
 
 			if(node->next != NULL)
 			{
@@ -251,6 +267,15 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 			}
 			node = node->next;
 		}
+		sem_wait(&free_semaphore);
+		//printf("Freeing: %s|\n", sig_node_key.key);
+		free(sig_node_key.key);
+		sem_post(&free_semaphore);
 	}
+
+
+	sem_wait(&free_semaphore);
+	free(msg_node_key.key);
+	sem_post(&free_semaphore);
 }
 

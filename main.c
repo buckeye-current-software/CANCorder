@@ -34,10 +34,11 @@
 #include "SignalAVL.h"
 #include "datalogger.h"
 #include "translator.h"
+#include "LinkedList.h"
 
 tree *msg_tree;
 tree *signal_tree;
-sem_t semaphore;
+sem_t semaphore, free_semaphore, malloc_semaphore, can_semaphore;
 FILE *f;
 char logString[15];
 
@@ -56,8 +57,9 @@ void *txcanthread(int cansock) {
 		sleep(1);
 		txmsg.can_id  = 0x123;
 		txmsg.can_dlc = 0;
-
+		sem_wait(&can_semaphore);
 		write(cansock, &txmsg, sizeof(struct can_frame));
+		sem_post(&can_semaphore);
 	}
 	return NULL;
 }
@@ -93,7 +95,7 @@ void *logthread()
 		usleep(25000);
 		data_log(signal_tree);
 		fflush(f);
-		printf("Logged\n");
+		//printf("Logged\n");
 	}
 	fclose(f);
 	return NULL;
@@ -113,7 +115,7 @@ int main()
 	msg_tree = initialize_msg_avl();
 	signal_tree = initialize_signal_avl();
 
-	char *fileName = "newtest.dbc";
+	char *fileName = "largetest.dbc";
 	parseFile(fileName);
 
 	struct can_frame frame;
@@ -121,37 +123,48 @@ int main()
 	struct sockaddr_can addr;
 	struct ifreq ifr;
 	s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-	strcpy(ifr.ifr_name, "vcan0" );
+	strcpy(ifr.ifr_name, "can0" );
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
 	bind(s, (struct sockaddr *)&addr, sizeof(addr));
 
 	sem_init(&semaphore, 0, 1);
+	sem_init(&malloc_semaphore, 0, 1);
+	sem_init(&free_semaphore, 0, 1);
+	sem_init(&can_semaphore, 0, 1);
 	pthread_t txthread, logging;
 	pthread_create(&txthread, NULL, txcanthread, s);
 	pthread_create(&logging, NULL, logthread, NULL);
 
-	int msgsRecv = 0;
+
+	unsigned long msgsRecv = 0;
 
 	while(keepRunning){
+		sem_wait(&can_semaphore);
 		nbytes = read(s, &frame, sizeof(struct can_frame)); //This will flat out stop the program until a message is received
+		sem_post(&can_semaphore);
 		//printf("nbytes: %i", nbytes);
 		if (nbytes < 0)
 		{
 			perror("can raw socket read");
+			close(s);
+			pthread_join(txthread, NULL);
+			pthread_join(logging, NULL);
 			delete_tree(signal_tree);
 			delete_tree(msg_tree);
 			return 1;
 		}
 		if (nbytes > 0)
 		{
-			printf("%d\n", msgsRecv);
+			printf("%lu\n", msgsRecv);
 			msgsRecv++;
 			translate(msg_tree, signal_tree, &frame);
 		}
 	}
 	close(s);
+	pthread_join(txthread, NULL);
+	pthread_join(logging, NULL);
 	delete_tree(signal_tree);
 	delete_tree(msg_tree);
 	return 0;

@@ -11,11 +11,12 @@
 
 struct signal_structure
 {
-	char *id; // Please make this dynamic
+	char *id;
 	int startBit;
 	int length;
 	int byteOrder;
 	int dataType;
+	char *unit;
 };
 
 #endif // SIGNAL_H_

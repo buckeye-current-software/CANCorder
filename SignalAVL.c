@@ -58,6 +58,8 @@ void data_copy_sig(void *src, void *dst)
 
     d->key = s->key;
     d->signal = s->signal;
+    d->signal.id = s->signal.id;
+    d->signal.unit = s->signal.unit;
 }
 
 tree* initialize_signal_avl()

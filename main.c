@@ -55,7 +55,7 @@ void *txcanthread(int cansock) {
 	while(1)
 	{
 		sleep(1);
-		txmsg.can_id  = 0x123;
+		txmsg.can_id  = 0xAA;
 		txmsg.can_dlc = 0;
 		sem_wait(&can_semaphore);
 		write(cansock, &txmsg, sizeof(struct can_frame));

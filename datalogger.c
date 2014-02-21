@@ -32,7 +32,15 @@ struct tm * timeinfo;
 void insert_headers(void *n, void *param)
 {
 	struct signal_node *data = (struct signal_node *) n;
-	fprintf(f, "%s,", data->key);
+	fprintf(f, "%s", data->key);
+	if(data->signal.unit != NULL)
+	{
+		fprintf(f, " %s,", data->signal.unit);
+	}
+	else
+	{
+		fprintf(f, ",");
+	}
 	gettimeofday(&start_tv, NULL);
 }
 

@@ -49,7 +49,7 @@ union byteData
 extern sem_t semaphore, free_semaphore, malloc_semaphore;
 extern int maxSignalSize;
 
-void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
+int translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 
 	uint8_t frameLength = frame->can_dlc;
 	int msgID = (int)frame->can_id;
@@ -77,10 +77,14 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 		//printf("Found message in tree");
 		msg_node = get_message(message_tree, &msg_node_key, sizeof(struct message_node));
 		node = msg_node->list->head;
+		if(node == NULL)
+		{
+			return 1;
+		}
 		signal = node->signal;
 
 		sem_wait(&malloc_semaphore);
-		sig_node_key.key = (char*)malloc(maxSignalSize * sizeof(char));
+		sig_node_key.key = (char*)malloc((maxSignalSize+1) * sizeof(char));
 		sem_post(&malloc_semaphore);
 
 		//nextNode = node->next;
@@ -277,5 +281,6 @@ void translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 	sem_wait(&free_semaphore);
 	free(msg_node_key.key);
 	sem_post(&free_semaphore);
+	return 0;
 }
 

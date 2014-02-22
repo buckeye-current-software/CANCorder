@@ -46,8 +46,12 @@ void data_copy_msg(void *src, void *dst)
     struct message_node *s = (struct message_node *) src;
     struct message_node *d = (struct message_node *) dst;
 
-    d->key = s->key;
-    d->list = s->list;
+    d->key = malloc(strlen(s->key)+1);
+    d->list = malloc(sizeof(s->list));
+    memcpy(d->key, s->key, strlen(s->key)+1);
+    memcpy(d->list, s->list, sizeof(s->list));
+    //d->key = s->key;
+    //d->list = s->list;
 }
 
 tree* initialize_msg_avl()

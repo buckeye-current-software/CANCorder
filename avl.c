@@ -970,16 +970,18 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
         return t->count;
     }
     // Allocate memory for the new data and copy data.
-    to_add = calloc(sizeof(struct _node), 1);
+    to_add = malloc(sizeof(struct _node));
     if(to_add == NULL)
     {
-    	printf("TO ADD IS NULL");
+    	printf("TO ADD IS NULL\n");
     }
     to_add->data = malloc(datasize);
+    //memcpy(to_add->data, data, datasize);
     if(to_add->data == NULL)
     {
-    	t->data_copy(data, to_add->data);
+    	printf("To_add->data is NULL\n");
     }
+    t->data_copy(data, to_add->data);
     to_add->height = 0;
     to_add->left = to_add->right = NULL;
 

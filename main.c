@@ -115,7 +115,7 @@ int main()
 	msg_tree = initialize_msg_avl();
 	signal_tree = initialize_signal_avl();
 
-	char *fileName = "largetest.dbc";
+	char *fileName = "IOM2014.dbc";
 	parseFile(fileName);
 
 	struct can_frame frame;

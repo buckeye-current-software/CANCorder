@@ -67,11 +67,12 @@ int translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 	struct signal_structure signal;
 	struct list_node *node;
 	sem_wait(&malloc_semaphore);
-	msg_node_key.key = (char*)malloc(msgID * sizeof(char));
+	msg_node_key.key = (char*)malloc(5 * sizeof(char));
+	printf("Alloc'd pointer %p",msg_node_key.key);
 	sem_post(&malloc_semaphore);
 	//msg_node.key = "0";
 	sprintf(msg_node_key.key, "%d", msgID);
-
+	printf("with value %s\n", msg_node_key.key);
 	if(is_present(message_tree, &msg_node_key))
 	{
 		//printf("Found message in tree");
@@ -279,7 +280,12 @@ int translate(tree *message_tree, tree *signal_tree, struct can_frame *frame) {
 
 
 	sem_wait(&free_semaphore);
-	free(msg_node_key.key);
+	printf("msg_key = %s\n", msg_node_key.key);
+	if(msg_node_key.key != NULL)
+	{
+		printf("msg_key pointer: %p", msg_node_key.key);
+		free(msg_node_key.key);
+	}
 	sem_post(&free_semaphore);
 	return 0;
 }

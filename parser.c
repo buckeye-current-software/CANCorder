@@ -17,7 +17,6 @@ extern tree *msg_tree;
 extern tree *signal_tree;
 int maxSignalSize;
 
-
 void parseFile(char *fileName)
 {
 	maxSignalSize = 0;
@@ -41,10 +40,9 @@ void parseFile(char *fileName)
 	struct message_node msg;
 	struct signal_node sig_node; // The nodes that will go into the signal AVL tree
 	struct signal_structure sig; // An actual signal structure
-	struct signal_structure *currentSig;
 	//msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
-	//int msgNodes = 0, signalNodes = 0;
 	
+
 	while(fgets(buf,BUFSIZ,file) != NULL)
 	{
 		if(strstr(buf, "BO_") != NULL)
@@ -53,18 +51,11 @@ void parseFile(char *fileName)
 			{
 				// add current linked_list and message to Message AVL tree
 				msg.list = signal_linked_list; //Getting a warning before about "assignment from incompatible pointer type"
-				printf("MSG: %s\n", msg.key);
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
 
-				/*
-				 * Frees memory from the linked_list after it has been copied and storied into message_avl
-				 *
-				 * WARNING: These three lines destroy the list stored in the message tree. The lists should not be cleared here.
-				 * This will cause a large memory leak on program exit since all the data in list is never freed. Solution not found
-				 */
-
+				// Frees memory from the linked_list after it has been copied and storied into message_avl
 				//list_free(signal_linked_list);
-				//free(signal_linked_list);
+				//free(signal_linked_list);			These three lines destroy the list stored in the message tree. Just don't use?
 				//signal_linked_list = NULL;
 			}
 			first_insert_skipped = 1; // Start adding messages to tree after first msg in file found and skipped
@@ -99,16 +90,10 @@ void parseFile(char *fileName)
 			{
 				maxSignalSize = tmpLength;
 			}
-			signalID =(char*)malloc(tmpLength * sizeof(char));
 			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
 			sig.id = (char*)malloc(tmpLength * sizeof(char));
-			if(signalID == NULL || sig_node.key == NULL || sig.id == NULL)
-			{
-				printf("MALLOC IS NULL\n");
-			}
-			strcpy(signalID, tmp);
-			strcpy(sig.id, signalID);
-			strcpy(sig_node.key, signalID);
+			strcpy(sig.id, tmp);
+			strcpy(sig_node.key, tmp);
 			
 			// Move index +3 to skip useless dbc formatting stuff
 			index = index + 3;
@@ -157,33 +142,15 @@ void parseFile(char *fileName)
 			{
 				sig.dataType = 2; // Represents unsigned int
 			}
-			// Move to the signal's unit and store it
-			while(buf[index] != '"')
-			{
-				index ++;
-			}
-			index ++;
-			index2 = 0;
-			while(buf[index] != '"')
-			{
-				tmp[index2] = buf[index];
-				index2++;
-				index++;
-			}
-			tmp[index2] = '\0';
-			// SAVE MEMORY, SAVE THE ENVIRONMENT
 
-			if(index2 > 0)
-			{
-				sig.unit = (char*)malloc(index2 * sizeof(char));
-				strcpy(sig.unit, tmp);
-			}
+
 			// Add signal to linked_list
 			sig_node.signal = list_add_element(signal_linked_list, sig);
+
 			fprintf(stdout, "Inserting node into signal tree \n");
 			// Add signal to signal node, add signal node to AVL tree
 			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
-			free(signalID);
+			//free(signalID);
 		}
 
 		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
@@ -203,8 +170,9 @@ void parseFile(char *fileName)
 				nameIndex++;
 			}
 			tmp[nameIndex] = '\0';
-			tmpLength = strlen(tmp)+1;
-			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
+			//signalID =(char*)malloc(tmpLength * sizeof(char));
+			sig_node.key = (char*)malloc(strlen(tmp)+1 * sizeof(char));
+			//strcpy(signalID, tmp);
 			strcpy(sig_node.key, tmp);
 
 			get_data(signal_tree, &sig_node, sizeof(struct signal_node));

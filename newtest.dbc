@@ -36,12 +36,4 @@ BO_ 0 TestMsg1: 8 Vector__XXX
 BO_ 1 TestMsg2: 8 Vector__XXX
  SG_ GPS_validity_status : 7|8@0- (1,0) [0|0] "" Vector__XXX
 
-BO_ 2 TestMsg3: 8 Vector__XXX
- SG_ Years : 0|16@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Month : 16|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Day : 24|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Hours : 32|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Minutes : 40|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Seconds : 48|8@1+ (1,0) [0|0] "" Vector__XXX
-
 

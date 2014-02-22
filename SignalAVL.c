@@ -56,10 +56,12 @@ void data_copy_sig(void *src, void *dst)
     struct signal_node *s = (struct signal_node *) src;
     struct signal_node *d = (struct signal_node *) dst;
 
-    d->key = s->key;
+    d->key = malloc(strlen(s->key)+1);
+    //d->signal = malloc(sizeof(s->signal));
+    memcpy(d->key, s->key, strlen(s->key)+1);
+    //memcpy(d->signal, s->signal, sizeof(s->signal));
+    //d->key = s->key;
     d->signal = s->signal;
-    d->signal.id = s->signal.id;
-    d->signal.unit = s->signal.unit;
 }
 
 tree* initialize_signal_avl()

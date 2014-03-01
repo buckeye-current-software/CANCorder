@@ -12,10 +12,9 @@
 #include <pthread.h>
 
 struct signal_node {
-	char *key;
-	struct signal_structure signal; // I think this isn't needed
+	char key[50];
+	struct signal_structure *signal;
 	double value;
-	pthread_mutex_t lock;
 };
 
 int data_cmp_sig(void *a, void *b);

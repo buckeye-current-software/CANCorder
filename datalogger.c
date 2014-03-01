@@ -23,19 +23,20 @@ double prev_system_time;
 int headers_logged = 0, renamed = 0;
 struct signal_node sig_node_key;
 struct signal_node * sig_node;
-extern sem_t semaphore, free_semaphore, malloc_semaphore;
+struct signal_node * data;
+extern sem_t semaphore;
 extern FILE *f;
 extern char logString[15];
 time_t rawtime;
 struct tm * timeinfo;
 
-void insert_headers(void *n, void *param)
+void insert_headers(void *n)
 {
-	struct signal_node *data = (struct signal_node *) n;
+	data = (struct signal_node *) n;
 	fprintf(f, "%s", data->key);
-	if(data->signal.unit != NULL)
+	if(data->signal->unit != NULL)
 	{
-		fprintf(f, " %s,", data->signal.unit);
+		fprintf(f, " %s,", data->signal->unit);
 	}
 	else
 	{
@@ -44,20 +45,27 @@ void insert_headers(void *n, void *param)
 	gettimeofday(&start_tv, NULL);
 }
 
-void node_to_file(void *n, void *param)
+void node_to_file(void *n)
 {
-	struct signal_node *data = (struct signal_node *) n;
-	fprintf(f, "%g,", data->value);
+	data = (struct signal_node *) n;
+	if(data == NULL)
+	{
+		printf("There was a pointer that was NULL. Find me\n");
+		exit(1);
+	}
+	fprintf(f, "%f,", data->value);
 }
 
 void data_log(tree *signal_tree)
 {
-	sem_wait(&malloc_semaphore);
-	sig_node_key.key = (char*)malloc(20 * sizeof(char));
-	sem_post(&malloc_semaphore);
-
-	strcpy(sig_node_key.key, "GPS_validity_status");
+	// The signal to determine if we need to rename the file and change system time
+	strcpy(sig_node_key.key, "GPSValidityStatus");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
+	if(sig_node->signal == NULL || sig_node == NULL)
+	{
+		printf("There was a pointer that was NULL. Find me\n");
+		exit(1);
+	}
 	if(sig_node != NULL && sig_node->value == 1)
 	{
 		if(renamed == 0)
@@ -75,16 +83,14 @@ void data_log(tree *signal_tree)
 	timeinfo = localtime (&rawtime);
 	fprintf(f, "%.*s,", 24, asctime (timeinfo));
 
+	// Semaphore to protect against reading data that is being changed
 	sem_wait(&semaphore);
-	explore_tree(signal_tree, node_to_file, f);
+	explore_tree(signal_tree, node_to_file);
 	sem_post(&semaphore);
 	fprintf(f, "\n");
-	sem_wait(&free_semaphore);
-	free(sig_node_key.key);
-	sem_post(&free_semaphore);
 }
 
-void rename_log(tree *signal_tree)
+int rename_log(tree *signal_tree)
 {
 	char fileName[22] = "", value[5];
 	// Obtain Y, M, D, H, M, S for tree, store in something local
@@ -92,6 +98,11 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Years");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	year = sig_node->value;
+	if(year > 2500) // If we time traveled to the year 2500, we would surely come in last place... we don't want that
+	{
+		renamed = 0;
+		return 1;
+	}
 	sprintf(value, "%d", year);
 	strcat(fileName, value);
 	strcat(fileName, "-");
@@ -99,6 +110,11 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Month");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	month = sig_node->value;
+	if(month > 12)
+	{
+		renamed = 0;
+		return 1;
+	}
 	sprintf(value, "%d", month);
 	strcat(fileName, value);
 	strcat(fileName, "-");
@@ -106,6 +122,11 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Day");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	day = sig_node->value;
+	if(day > 31)
+	{
+		renamed = 0;
+		return 1;
+	}
 	sprintf(value, "%d", day);
 	strcat(fileName, value);
 	strcat(fileName, "--");
@@ -113,6 +134,11 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Hours");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	hour = sig_node->value;
+	if(hour > 24)
+	{
+		renamed = 0;
+		return 1;
+	}
 	sprintf(value, "%d", hour);
 	strcat(fileName, value);
 	strcat(fileName, "-");
@@ -120,6 +146,11 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Minutes");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	minute = sig_node->value;
+	if(minute > 60)
+	{
+		renamed = 0;
+		return 1;
+	}
 	sprintf(value, "%d", minute);
 	strcat(fileName, value);
 	strcat(fileName, ".csv");
@@ -127,19 +158,24 @@ void rename_log(tree *signal_tree)
 	strcpy(sig_node_key.key, "Seconds");
 	sig_node = get_signal(signal_tree, &sig_node_key, sizeof(struct signal_node));
 	seconds = sig_node->value;
-	//sprintf(value, "%d", seconds);
-	//strcat(fileName, value);
+	if(seconds > 60)
+	{
+		renamed = 0;
+		return 1;
+	}
+
 	new_tv.tv_sec = ((year-1970)*31556900 + (month-1)*2629740 + (day-1)*86400 + hour*3600 + minute*60 + seconds);
 	prev_system_time = (double) (now_tv.tv_usec - start_tv.tv_usec) / 1000000 + (double) (now_tv.tv_sec - start_tv.tv_sec);
 	settimeofday(&new_tv, NULL);
 	gettimeofday(&start_tv, NULL);
 
-	//Final fileName format = 2014-2-1--15-36
+	//Final fileName format = 2014-2-1--15-36 (Y-M-D--Hour-Minutes)
 	fclose(f);
-
+	// Rename file, reopen it for datalogging
 	printf("%s\n", logString);
 	rename(logString, fileName);
 	f = fopen(fileName, "a");
+	return 0;
 }
 
 

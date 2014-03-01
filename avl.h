@@ -358,7 +358,9 @@ void print_tree(tree *t);
 * treatement(n, param);
 *
 */
-void explore_tree(tree *t, void (*treatement)(void *, void *), void *param);
+void explore_tree(tree *t, void (*treatement)(void *));
+
+void datalog_tree(tree *t, size_t data_size, FILE *f);
 
 /** \fn explore_restrain_tree(tree *t, int (*check)(void *, void *),
 * void *param,
@@ -422,10 +424,17 @@ void delete_node(tree *t, void *data);
 */
 int get_data(tree *t, void *data, size_t data_size);
 
+/*
+ * Provides the same functionality as get_data but returns the actual
+ * pointer to the signal in the tree. Use this over get_data when
+ * accessing data (memory leak in get_data?)
+ */
 struct signal_node * get_signal(tree *t, void *data, size_t data_size);
 
+/*
+ * Provides the same functionality as get_signal but returns a message
+ * node instead of a signal_node
+ */
 struct message_node * get_message(tree *t, void *data, size_t data_size);
-
-int initialize_pthread_lock();
 
 #endif

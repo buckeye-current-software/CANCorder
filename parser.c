@@ -29,34 +29,27 @@ void parseFile(char *fileName)
 		exit(1);		
 	}
 
-	/* Read a line in at a time */
 	char buf[BUFSIZ], messageID[10], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
-	char *signalID;
-	int index, index2 = 0, tmpLength; // Variables used to store signalID's into smaller arrays
-	int first_insert_skipped = 0;     // Skips inserting the first message since no signals have been associated to it yet (it's added later)
-	int added_last_msg = 0;           // Used to save the last message in the file
+	int index, index2 = 0, tmpLength; 							// Variables used to store signalID's into smaller arrays
+	int first_insert_skipped = 0;     // Skips inserting the first message since no signals have
+																// been associated to it yet (it's added later)
 	
-	struct my_list* signal_linked_list = NULL; // Linked list of signals all in a single message
+	struct my_list* signal_linked_list = NULL; 	// Linked list of signals all in a single message
 	struct message_node msg;
-	struct signal_node sig_node; // The nodes that will go into the signal AVL tree
-	struct signal_structure sig; // An actual signal structure
-	//msg.key[0] = '\0';           // Simply prevents adding an empty message into the message tree down below
+	struct signal_node sig_node;				// The nodes that will go into the signal AVL tree
+	struct signal_node * signode_to_edit;		// Signal nodes that are edited after in tree
+	struct signal_structure sig; 				// An actual signal structure
 	
-
+	/* Read a line in at a time */
 	while(fgets(buf,BUFSIZ,file) != NULL)
 	{
 		if(strstr(buf, "BO_") != NULL)
 		{
-			if(first_insert_skipped == 1) //msg.key isn't NULL since it is a pointer to the thing in message_node
+			if(first_insert_skipped == 1)
 			{
 				// add current linked_list and message to Message AVL tree
 				msg.list = signal_linked_list; //Getting a warning before about "assignment from incompatible pointer type"
 				insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-
-				// Frees memory from the linked_list after it has been copied and storied into message_avl
-				//list_free(signal_linked_list);
-				//free(signal_linked_list);			These three lines destroy the list stored in the message tree. Just don't use?
-				//signal_linked_list = NULL;
 			}
 			first_insert_skipped = 1; // Start adding messages to tree after first msg in file found and skipped
 
@@ -67,9 +60,7 @@ void parseFile(char *fileName)
 				index++;
 			}
 			messageID[index-4] = '\0';
-			tmpLength = strlen(messageID) + 1;
-			msg.key = (char*)malloc(tmpLength * sizeof(char));
-			strcpy(msg.key, messageID);
+			msg.key = atoi(messageID);
 
 			signal_linked_list = list_new();
 		}
@@ -90,8 +81,9 @@ void parseFile(char *fileName)
 			{
 				maxSignalSize = tmpLength;
 			}
-			sig_node.key = (char*)malloc(tmpLength * sizeof(char));
-			sig.id = (char*)malloc(tmpLength * sizeof(char));
+			sig_node.signal = malloc(sizeof(struct signal_structure));
+
+			sig.unit[0] = '\0';
 			strcpy(sig.id, tmp);
 			strcpy(sig_node.key, tmp);
 			
@@ -143,16 +135,37 @@ void parseFile(char *fileName)
 				sig.dataType = 2; // Represents unsigned int
 			}
 
+			// Move to the signal's unit and store it
+			while(buf[index] != '"')
+			{
+				index ++;
+			}
+			index ++;
+			index2 = 0;
+			while(buf[index] != '"')
+			{
+				tmp[index2] = buf[index];
+				index2++;
+				index++;
+			}
+			tmp[index2] = '\0';
 
+			if(index2 > 0)
+			{
+				strcpy(sig.unit, tmp);
+			}
+
+			// Set default value of node to 0
+			sig_node.value = 0;
 			// Add signal to linked_list
-			sig_node.signal = list_add_element(signal_linked_list, sig);
+			sig_node.signal = list_add_element(signal_linked_list, &sig);
 
 			fprintf(stdout, "Inserting node into signal tree \n");
 			// Add signal to signal node, add signal node to AVL tree
 			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
-			//free(signalID);
 		}
 
+		// This signifies that the data type for a signal stored earlier is wrong
 		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
 		{
 			int nameIndex = 0;
@@ -170,37 +183,27 @@ void parseFile(char *fileName)
 				nameIndex++;
 			}
 			tmp[nameIndex] = '\0';
-			//signalID =(char*)malloc(tmpLength * sizeof(char));
-			sig_node.key = (char*)malloc(strlen(tmp)+1 * sizeof(char));
-			//strcpy(signalID, tmp);
 			strcpy(sig_node.key, tmp);
 
-			get_data(signal_tree, &sig_node, sizeof(struct signal_node));
-			delete_node(signal_tree, &sig_node);
+			signode_to_edit = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
 			index = index + 3;
-			if(buf[index] == '1')
+			if(buf[index] == '1') 	//Change data type to float
 			{
-				sig_node.signal.dataType = 3;
+				signode_to_edit->signal->dataType = 3;
 			}
-			else
+			else					// Change data type to double
 			{
-				sig_node.signal.dataType = 4;
+				signode_to_edit->signal->dataType = 4;
 			}
-			if (!is_present(signal_tree, &sig_node))
-			{
-				printf("Signal was indeed deleted from tree");
-			}
-			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
 		}
 	}
+	// Insert last message node into the message tree
 	msg.list = signal_linked_list;
 	insert_elmt(msg_tree, &msg, sizeof(struct message_node));
-	added_last_msg = 1;
 
 	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
 	print_tree(msg_tree);
 	fprintf(stdout, "Signal Tree: \n");
 	print_tree(signal_tree);
-	
 	fclose(file);
 }

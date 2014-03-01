@@ -10,12 +10,27 @@
 
 #include "avl.h"
 
-void insert_headers(void *n, void *param);
+/*
+ * Inserts the names and units of all signals into the top line of the datalogging file
+ */
+void insert_headers(void *n);
 
-void node_to_file(void *n, void *param);
+/*
+ * Takes a specific node and datalogs it's value into the file. Used in conjunction with
+ * avl.h's explore_tree function
+ */
+void node_to_file(void *n);
 
+/*
+ * Handles the overall datalogging process. Calls other datalogging functions.
+ * Parameters:
+ * 		signal_tree - the tree to datalog (should be a signal tree not a message tree)
+ */
 void data_log(tree *signal_tree);
 
-void rename_log(tree *signal_tree);
+/*
+ * Renames the file and changes system time when GPSValidityStatus == 1
+ */
+int rename_log(tree *signal_tree);
 
 #endif /* DATALOGGER_H_ */

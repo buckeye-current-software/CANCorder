@@ -1,10 +1,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "LinkedList.h"
 #include "signal.h"
 
- 
+// EXAMPLE OF A LINKEDLIST
 /*
 int main(void)
 {
@@ -33,20 +34,16 @@ int main(void)
  
  
 /* Will always return the pointer to my_list */
-struct signal_structure list_add_element(struct my_list* s, struct signal_structure sig)
+struct signal_structure* list_add_element(struct my_list* s, struct signal_structure* sig)
 {
-  struct signal_structure* currentSig = malloc(sizeof(struct signal_structure));
-  *currentSig = sig;
-  
-
-  struct list_node* p = malloc( 1 * sizeof(*p) );
+  struct list_node* p = malloc(sizeof(struct list_node));
+  p->signal = malloc(sizeof(struct signal_structure));
  
   if( NULL == p )
     {
       fprintf(stderr, "IN %s, %s: malloc() failed\n", __FILE__, "list_add");
     }
- 
-  p->signal = sig;
+  memcpy(p->signal, sig, sizeof(struct signal_structure));
   p->next = NULL;
  
  
@@ -54,7 +51,6 @@ struct signal_structure list_add_element(struct my_list* s, struct signal_struct
     {
       printf("Queue not initialized\n");
       free(p);
-	  free(currentSig);
     }
   else if( NULL == s->head && NULL == s->tail )
     {
@@ -65,7 +61,6 @@ struct signal_structure list_add_element(struct my_list* s, struct signal_struct
     {
       fprintf(stderr, "There is something seriously wrong with your assignment of head/tail to the list\n");
       free(p);
-	  free(currentSig);
     }
   else
     {
@@ -74,7 +69,7 @@ struct signal_structure list_add_element(struct my_list* s, struct signal_struct
       s->tail = p;
     }
  
-  return *currentSig;
+  return p->signal;
 }
  
  
@@ -103,7 +98,10 @@ struct my_list* list_remove_element( struct my_list* s )
  
   h = s->head;
   p = h->next;
+  free(h->signal);
+  h->signal = NULL;// Added so that signal_struct is free'd before we free the list_node
   free(h);
+  h = NULL;
   s->head = p;
   if( NULL == s->head )  s->tail = s->head;   /* The element tail was pointing to is free(), so we need an update */
  
@@ -124,7 +122,7 @@ struct my_list* list_free( struct my_list* s )
  
 struct my_list* list_new(void)
 {
-  struct my_list* p = malloc( 1 * sizeof(*p));
+  struct my_list* p = malloc( 1 * sizeof(*p)); // Should work, may switch to malloc(sizeof(struct my_list)) later
  
   if( NULL == p )
     {
@@ -155,11 +153,12 @@ void list_print( const struct my_list* ps )
  
 void list_print_element(const struct list_node* p )
 {
-  if( p ) 
+	// Removed because we don't ever need to print the list elements. Change as needed
+	if( p )
     {
       //printf("Num = %d\n", p->num);
     }
-  else
+	else
     {
       //printf("Can not print NULL struct \n");
     }

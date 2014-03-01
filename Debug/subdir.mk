@@ -7,7 +7,6 @@ O_SRCS += \
 ../lib.o 
 
 C_SRCS += \
-../BikeAVL.c \
 ../LinkedList.c \
 ../MessageAVL.c \
 ../SignalAVL.c \
@@ -19,7 +18,6 @@ C_SRCS += \
 ../translator.c 
 
 OBJS += \
-./BikeAVL.o \
 ./LinkedList.o \
 ./MessageAVL.o \
 ./SignalAVL.o \
@@ -31,7 +29,6 @@ OBJS += \
 ./translator.o 
 
 C_DEPS += \
-./BikeAVL.d \
 ./LinkedList.d \
 ./MessageAVL.d \
 ./SignalAVL.d \

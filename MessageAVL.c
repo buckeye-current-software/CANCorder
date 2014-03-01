@@ -15,8 +15,7 @@ int data_cmp_msg(void *a, void *b)
     if (!aa || !bb)
         return 0;
 
-    return strcmp(aa->key, bb->key);
-    //return aa->key - bb->key;
+    return aa->key - bb->key;
 }
 
 // Function that dumps data structure
@@ -34,9 +33,11 @@ void data_delete_msg(void *d)
     struct message_node *dd = (struct message_node *) d;
 
     if (dd) {
-        // You can put here all additional needed
-        // memory deallocation
+    	list_free(dd->list);
+    	free(dd->list);
+    	dd->list = NULL;
         free(dd);
+        dd = NULL;
     }
 }
 
@@ -46,12 +47,8 @@ void data_copy_msg(void *src, void *dst)
     struct message_node *s = (struct message_node *) src;
     struct message_node *d = (struct message_node *) dst;
 
-    d->key = malloc(strlen(s->key)+1);
-    d->list = malloc(sizeof(s->list));
-    memcpy(d->key, s->key, strlen(s->key)+1);
-    memcpy(d->list, s->list, sizeof(s->list));
-    //d->key = s->key;
-    //d->list = s->list;
+    d->key = s->key;
+    d->list = s->list;
 }
 
 tree* initialize_msg_avl()

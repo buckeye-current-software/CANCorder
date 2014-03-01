@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include "signal.h"
 
- //Stores signals
-struct list_node //rename to list node
+//Stores signals
+struct list_node
 {
-  struct signal_structure signal;
+  struct signal_structure *signal;
   struct list_node* next;
 };
 
@@ -27,7 +27,7 @@ struct my_list
 };
 
 
-struct signal_structure list_add_element( struct my_list*, struct signal_structure);
+struct signal_structure* list_add_element( struct my_list*, struct signal_structure*);
 struct my_list* list_remove_element( struct my_list*);
 
 

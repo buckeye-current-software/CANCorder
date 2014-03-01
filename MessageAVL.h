@@ -2,11 +2,14 @@
 #define MESSAGEAVL_H_
 
 #include "LinkedList.h"
-// Structure we want to store
-// key is used to order data
-// Using linked_list to store all signals for that message
+
+/*
+ * Structure we want to store
+ * Key is used to order data
+ * Using linked_list to store all signals for that message
+*/
 struct message_node {
-    char *key;
+    int key;
     struct my_list *list;
 };
 

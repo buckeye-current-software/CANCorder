@@ -23,6 +23,10 @@ int data_cmp_sig(void *a, void *b)
     if (!aa || !bb)
         return 0;
     //printf("Key 1: %s ---- Key 2: %s\n", aa->key, bb->key);
+    if(strstr(aa->key, bb->key))
+    {
+    	return 0;
+    }
     return strcmp(aa->key, bb->key);
 
 }
@@ -35,7 +39,7 @@ void data_print_sig(void *d)
 	 */
     struct signal_node *dd = (struct signal_node *) d;
     if (dd)
-    	printf("{ %s -> %s }\n", " ", dd->signal.id);
+    	printf("{ %s -> %s }\n", " ", dd->signal->id);
 }
 
 // Function that delete a data structure
@@ -44,9 +48,9 @@ void data_delete_sig(void *d)
     struct signal_node *dd = (struct signal_node *) d;
 
     if (dd) {
-        // You can put here all additional needed
-        // memory deallocation
+    	dd->signal = NULL;
         free(dd);
+        dd = NULL;
     }
 }
 
@@ -56,11 +60,7 @@ void data_copy_sig(void *src, void *dst)
     struct signal_node *s = (struct signal_node *) src;
     struct signal_node *d = (struct signal_node *) dst;
 
-    d->key = malloc(strlen(s->key)+1);
-    //d->signal = malloc(sizeof(s->signal));
-    memcpy(d->key, s->key, strlen(s->key)+1);
-    //memcpy(d->signal, s->signal, sizeof(s->signal));
-    //d->key = s->key;
+    memcpy(d->key,s->key,50);
     d->signal = s->signal;
 }
 

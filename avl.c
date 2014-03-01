@@ -650,7 +650,11 @@ void delete_tree_recur(node n, void (*data_delete) (void *))
         delete_tree_recur(n->right, data_delete);
 
     data_delete(n->data);
+    n->data = NULL;
+    n->left = NULL;
+    n->right = NULL;
     free(n);
+    n = NULL;
 }
 
 /** \fn void print_tree_recur(node t, void (*data_print) (void *));
@@ -691,18 +695,20 @@ void print_tree_recur(node t, void (*data_print) (void *))
 *
 * \warning If you use this function you probably make a mistake.
 */
-void explore_tree_recur(node t, void (*treatement)(void *, void *), void *param)
+void explore_tree_recur(node t, void (*treatement)(void *))
 {
     if (t == NULL)
         return;
 
     // recursively treat left subtree.
-    explore_tree_recur(t->left, treatement, param);
+    explore_tree_recur(t->left, treatement);
     // treat current node.
-    treatement(t->data, param);
+    (*treatement)(t->data);
     // recursively treat right subtree.
-    explore_tree_recur(t->right, treatement, param);
+    explore_tree_recur(t->right, treatement);
 }
+
+
 
 /** \fn int explore_restrain_tree_recur(node t, int (*check)(void *, void *),
 * void *param, void *data_min,
@@ -793,7 +799,7 @@ int get_data_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *
 
 }
 
-void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *, void *))
+void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (void *, void *)) // Doesn't actually use data_size. Remove eventually
 {
 	int cmp = 0;
 
@@ -801,6 +807,7 @@ void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (v
 	{
 		return NULL;
 	}
+
 	cmp = data_cmp(n->data, data);
 	if (cmp == 0) {
 		return n->data;
@@ -811,70 +818,6 @@ void * get_signal_recur(node n, void *data, size_t data_size, int (*data_cmp) (v
 	// Need to go deep in the right subtree.
 		return get_signal_recur(n->right, data, data_size, data_cmp);
 	}
-}
-
-/** \fn int stub__data_cmp(void *a, void *b)
-* \brief Stub function used if no data_cmp functio is provided.
-*
-* \param a First node to compare.
-* \param b Second node to compare.
-* \return Difference of pointer nodes.
-*
-* \warning This function is just a stub and shall never be used
-* in your production project.
-*/
-int stub__data_cmp(void *a, void *b)
-{
-    //return (int) ((ptrdiff_t) a - (ptrdiff_t) b);
-}
-
-/** \fn void stub__data_print(void *d)
-* \brief Stub function used if no data_print function is provided.
-*
-* \param d Data to print.
-*
-* Print to \c stdout the pointer of data.
-*
-* \warning This function is just a stub and shall never be used
-* in your production project.
-*/
-void stub__data_print(void *d)
-{
-    printf("0x%p", d);
-}
-
-/** \fn void stub__data_delete(void *d)
-* \brief Stub function used if no data_delete function is provided.
-*
-* \param d Data to delete.
-*
-* This fonction call \c free on \c d.
-*
-* \warning This function is just a stub. If your data is more
-* complicated than a single static structure, you must provide
-* your \c data_delete implementation. If not your program will
-* cause memory leaks on tree deletion.
-*/
-void stub__data_delete(void *d)
-{
-    free(d);
-}
-
-/** \fn void stub__data_copy(void *src, void *dst)
-* \brief Stub function used if no data_copy function is provided.
-*
-* \param src Data source
-* \param dst Data destination
-*
-* This function call \c memcpy to copy \c src into \c dst.
-*
-* \warning This function is just a stub. If your data is more complicated
-* than a single static structure, you must provide your \c data_copy
-* implementation.
-*/
-void stub__data_copy(void *src, void *dst)
-{
-    memcpy(dst, src, sizeof(src));
 }
 
 /* ************************************************************************* *\
@@ -938,10 +881,10 @@ tree *init_dictionnary(int (*data_cmp)(void *, void *),
     // Initialized field
     t->count = 0;
     t->root = NULL;
-    t->data_cmp = data_cmp ? data_cmp : stub__data_cmp;
-    t->data_print = data_print ? data_print : stub__data_print;
-    t->data_delete = data_delete ? data_delete : stub__data_delete;
-    t->data_copy = data_copy ? data_copy : stub__data_copy;
+    t->data_cmp = data_cmp;
+    t->data_print = data_print;
+    t->data_delete = data_delete;
+    t->data_copy = data_copy;
 
     return t;
 }
@@ -970,17 +913,18 @@ unsigned int insert_elmt(tree *t, void *data, size_t datasize)
         return t->count;
     }
     // Allocate memory for the new data and copy data.
-    to_add = malloc(sizeof(struct _node));
+    to_add = calloc(sizeof(struct _node),1);
     if(to_add == NULL)
     {
     	printf("TO ADD IS NULL\n");
     }
-    to_add->data = malloc(datasize);
+    to_add->data = calloc(datasize,1);
     //memcpy(to_add->data, data, datasize);
     if(to_add->data == NULL)
     {
     	printf("To_add->data is NULL\n");
     }
+    //to_add->data = data;
     t->data_copy(data, to_add->data);
     to_add->height = 0;
     to_add->left = to_add->right = NULL;
@@ -1032,6 +976,7 @@ void delete_tree(tree *t)
 
     delete_tree_recur(t->root, t->data_delete);
     free(t);
+    t = NULL;
 }
 
 /* \fn void print_tree(tree *t);
@@ -1064,7 +1009,7 @@ void print_tree(tree *t)
 * treatement(n, param);
 *
 */
-void explore_tree(tree *t, void (*treatement)(void *, void *), void *param)
+void explore_tree(tree *t, void (*treatement)(void *))
 {
     if (t == NULL)
         return;
@@ -1072,7 +1017,7 @@ void explore_tree(tree *t, void (*treatement)(void *, void *), void *param)
         return;
 
     // recursively explore the whole tree.
-    explore_tree_recur(t->root, treatement, param);
+    explore_tree_recur(t->root, treatement);
 }
 
 /* \fn explore_restrain_tree(tree *t, int (*check)(void *, void *),
@@ -1180,6 +1125,11 @@ int get_data(tree *t, void *data, size_t data_size)
     return get_data_recur(t->root, data, data_size, t->data_cmp);
 }
 
+/*
+ * Provides the same functionality as get_data but returns the actual
+ * pointer to the signal in the tree. Use this over get_data when
+ * accessing data (memory leak in get_data?)
+ */
 struct signal_node * get_signal(tree *t, void *data, size_t data_size)
 {
 	if (t == NULL)
@@ -1193,6 +1143,10 @@ struct signal_node * get_signal(tree *t, void *data, size_t data_size)
 	return get_signal_recur(t->root, data, data_size, t->data_cmp);
 }
 
+/*
+ * Provides the same functionality as get_signal but returns a message
+ * node instead of a signal_node
+ */
 struct message_node * get_message(tree *t, void *data, size_t data_size)
 {
 	if (t == NULL)

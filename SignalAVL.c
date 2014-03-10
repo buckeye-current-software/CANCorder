@@ -23,10 +23,10 @@ int data_cmp_sig(void *a, void *b)
     if (!aa || !bb)
         return 0;
     //printf("Key 1: %s ---- Key 2: %s\n", aa->key, bb->key);
-    if(strstr(aa->key, bb->key))
+    /*if(strstr(aa->key, bb->key))
     {
     	return 0;
-    }
+    }*/
     return strcmp(aa->key, bb->key);
 
 }

@@ -43,7 +43,7 @@ tree *signal_tree;
 sem_t semaphore, can_semaphore;
 FILE *f;
 char logString[15];
-
+const int canfd_on = 1;
 int keepRunning = 1;
 
 void my_handler(int dummy) {
@@ -55,15 +55,13 @@ void my_handler(int dummy) {
  */
 void *txcanthread(int cansock) {
 
-	struct canfd_frame txmsg;
+	struct can_frame txmsg;
 	while(keepRunning)
 	{
 		sleep(1);
 		txmsg.can_id  = 0xAA; 		// CANcorder heartbeat address
-		txmsg.len = 0; 				// No data associated with the heartbeat
-		sem_wait(&can_semaphore); 	// Wait until we aren't reading in a message (may not be necessary)
+		txmsg.can_dlc = 0; 				// No data associated with the heartbeat
 		write(cansock, &txmsg, sizeof(struct can_frame));
-		sem_post(&can_semaphore);
 	}
 	return NULL;
 }
@@ -120,6 +118,11 @@ int main()
 	char *fileName = "IOM2014.dbc";			// Your .dbc file
 	parseFile(fileName);	// Parse the file
 
+	fd_set rdfs;
+	char ctrlmsg[CMSG_SPACE(sizeof(struct timeval)) + CMSG_SPACE(sizeof(__u32))];
+	struct iovec iov;
+	struct msghdr msg;
+
 	struct canfd_frame frame;
 	int s, nbytes;
 	struct sockaddr_can addr;
@@ -129,6 +132,7 @@ int main()
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = 0; // Used to be ifr.ifr_ifindex
+	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_on, sizeof(canfd_on));
 	if(bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 	{
 		printf("Problem binding socket");
@@ -144,36 +148,45 @@ int main()
 
 	unsigned long msgsRecv = 0;
 
-	while(keepRunning){
-		/*if(msgsRecv > 10000) // Debugging message limit
-		{
-			keepRunning = 0;
-		}*/
-		sem_wait(&can_semaphore);
-		nbytes = read(s, &frame, sizeof(struct canfd_frame)); //This will stop the program until a message is received
-		sem_post(&can_semaphore);
+	iov.iov_base = &frame;
+	msg.msg_name = &addr;
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
+	msg.msg_control = &ctrlmsg;
 
-		//Don't allow the translation of bad reads
-		if (nbytes < sizeof(struct can_frame))
+	while(keepRunning){
+		FD_ZERO(&rdfs);
+		FD_SET(s, &rdfs);
+		if (FD_ISSET(s, &rdfs))
 		{
-			fprintf(stderr, "read: incomplete CAN frame\n");
-			return 1;
-		}
-		if (nbytes < 0)
-		{
-			perror("Close socket?");
-			close(s);
-			pthread_join(txthread, NULL);
-			pthread_join(logging, NULL);
-			delete_tree(signal_tree);
-			delete_tree(msg_tree);
-			return 1;
-		}
-		if (nbytes > 0)
-		{
-			//printf("%lu\n", msgsRecv);	// Debugging the receiving of messages from CAN bus.
-			msgsRecv++;
-			translate(msg_tree, signal_tree, &frame);
+			iov.iov_len = sizeof(frame);
+			msg.msg_namelen = sizeof(addr);
+			msg.msg_controllen = sizeof(ctrlmsg);
+			msg.msg_flags = 0;
+			nbytes = recvmsg(s, &msg, 0);
+
+			//Don't allow the translation of bad reads
+			if (nbytes < sizeof(struct can_frame))
+			{
+				fprintf(stderr, "read: incomplete CAN frame\n");
+				return 1;
+			}
+			if (nbytes < 0)
+			{
+				perror("Close socket?");
+				close(s);
+				pthread_join(txthread, NULL);
+				pthread_join(logging, NULL);
+				delete_tree(signal_tree);
+				delete_tree(msg_tree);
+				return 1;
+			}
+			if (nbytes > 0)
+			{
+				//printf("%lu\n", msgsRecv);	// Debugging the receiving of messages from CAN bus.
+				//msgsRecv++;
+				translate(msg_tree, signal_tree, &frame);
+			}
 		}
 	}
 	close(s);

@@ -1,5 +1,5 @@
 datalogger.d: ../datalogger.c ../datalogger.h ../avl.h ../SignalAVL.h \
- ../signal.h
+ ../signal.h ../MessageAVL.h ../LinkedList.h
 
 ../datalogger.h:
 
@@ -8,3 +8,7 @@ datalogger.d: ../datalogger.c ../datalogger.h ../avl.h ../SignalAVL.h \
 ../SignalAVL.h:
 
 ../signal.h:
+
+../MessageAVL.h:
+
+../LinkedList.h:

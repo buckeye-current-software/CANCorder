@@ -42,9 +42,10 @@ tree *msg_tree;
 tree *signal_tree;
 sem_t semaphore, can_semaphore;
 FILE *f;
-char logString[15];
+char logString[150];
 const int canfd_on = 1;
 int keepRunning = 1;
+unsigned int errors = 0;
 
 void my_handler(int dummy) {
     keepRunning = 0;
@@ -59,9 +60,13 @@ void *txcanthread(int cansock) {
 	while(keepRunning)
 	{
 		sleep(1);
-		txmsg.can_id  = 0xAA; 		// CANcorder heartbeat address
-		txmsg.can_dlc = 0; 				// No data associated with the heartbeat
-		write(cansock, &txmsg, sizeof(struct can_frame));
+		txmsg.can_id = 0xAA; 		// CANcorder heartbeat address
+		txmsg.can_dlc = 0; 	// No data associated with the heartbeat
+
+		if(write(cansock, &txmsg, sizeof(struct can_frame)) < 0)
+		{
+			printf("Error writing heartbeat\n");
+		}
 	}
 	return NULL;
 }
@@ -72,14 +77,16 @@ void *logthread()
 	int logNum = 1;
 	char lognumstr[4];
 	sprintf(lognumstr, "%d", logNum);
-	strcpy(logString, "log");
+	strcpy(logString, "/home/cancorder/log");
+	//strcpy(logString, "log");
 	strcat(logString, lognumstr);
 	strcat(logString, ".csv");
 	while(access(logString, F_OK ) != -1)
 	{
 		logNum ++;
 		sprintf(lognumstr, "%d", logNum);
-		strcpy(logString, "log");
+		strcpy(logString, "/home/cancorder/log");
+		//strcpy(logString, "log");
 		strcat(logString, lognumstr);
 		strcat(logString, ".csv");
 	}
@@ -90,7 +97,8 @@ void *logthread()
 		printf("Error opening file!\n");
 		exit(1);
 	}
-	fprintf(f, "Runtime,System_Time,");			// Start inserting headers
+	fprintf(f, "Runtime,System_Time,ErrorFrames,");			// Start inserting headers
+	explore_tree(msg_tree, insert_headers_messages);
 	explore_tree(signal_tree, insert_headers); 	// Generates headers once (can change to once in so many lines written)
 	fprintf(f, "\n");
 	while(keepRunning)
@@ -103,6 +111,16 @@ void *logthread()
 	return NULL;
 }
 
+void *syncthread()
+{
+	while(keepRunning)
+	{
+		fsync(fileno(f));
+		sleep(2);
+	}
+	return NULL;
+
+}
 int main()
 {
 	struct sigaction sigIntHandler;
@@ -115,7 +133,8 @@ int main()
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
 	signal_tree = initialize_signal_avl();
 
-	char *fileName = "IOM2014.dbc";			// Your .dbc file
+	char *fileName = "/home/cancorder/IOM2014.dbc";			// Your .dbc file
+	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 
 	fd_set rdfs;
@@ -127,11 +146,14 @@ int main()
 	int s, nbytes;
 	struct sockaddr_can addr;
 	struct ifreq ifr;
-	s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+	if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+		perror("Error while opening socket");
+		return -1;
+	}
 	strcpy(ifr.ifr_name, "can0" );
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
-	addr.can_ifindex = 0; // Used to be ifr.ifr_ifindex
+	addr.can_ifindex = ifr.ifr_ifindex;
 	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_on, sizeof(canfd_on));
 	if(bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 	{
@@ -141,10 +163,11 @@ int main()
 
 	sem_init(&semaphore, 0, 1);
 	sem_init(&can_semaphore, 0, 1);
-	pthread_t txthread, logging;
+	pthread_t txthread, logging, sync;
 	pthread_create(&txthread, NULL, txcanthread, s);
 	pthread_create(&logging, NULL, logthread, NULL);
-
+	sleep(2);
+	pthread_create(&sync, NULL, syncthread, NULL);
 
 	unsigned long msgsRecv = 0;
 
@@ -177,6 +200,7 @@ int main()
 				close(s);
 				pthread_join(txthread, NULL);
 				pthread_join(logging, NULL);
+				pthread_join(syncthread, NULL);
 				delete_tree(signal_tree);
 				delete_tree(msg_tree);
 				return 1;
@@ -192,6 +216,8 @@ int main()
 	close(s);
 	pthread_join(txthread, NULL); // We want to close the threads before deleting the trees they are accessing
 	pthread_join(logging, NULL);
+	pthread_join(syncthread, NULL);
+
 	delete_tree(signal_tree);
 	delete_tree(msg_tree);
 	free(signal_tree);

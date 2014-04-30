@@ -29,13 +29,14 @@ void parseFile(char *fileName)
 		exit(1);		
 	}
 
-	char buf[BUFSIZ], messageID[10], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
+	char buf[BUFSIZ], messageID[10], messageName[50], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
 	int index, index2 = 0, tmpLength; 							// Variables used to store signalID's into smaller arrays
 	int first_insert_skipped = 0;     // Skips inserting the first message since no signals have
 																// been associated to it yet (it's added later)
 	
 	struct my_list* signal_linked_list = NULL; 	// Linked list of signals all in a single message
-	struct message_node msg;
+	struct message_node msg, tempNode;
+	struct message_node * msgnode_to_edit;
 	struct signal_node sig_node;				// The nodes that will go into the signal AVL tree
 	struct signal_node * signode_to_edit;		// Signal nodes that are edited after in tree
 	struct signal_structure sig; 				// An actual signal structure
@@ -43,7 +44,7 @@ void parseFile(char *fileName)
 	/* Read a line in at a time */
 	while(fgets(buf,BUFSIZ,file) != NULL)
 	{
-		if(strstr(buf, "BO_") != NULL)
+		if(strstr(buf, "BO_")-buf == 0)
 		{
 			if(first_insert_skipped == 1)
 			{
@@ -61,12 +62,24 @@ void parseFile(char *fileName)
 			}
 			messageID[index-4] = '\0';
 			msg.key = atoi(messageID);
-
+			index++;
+			index2 = 0;
+			while(buf[index] != ':')
+			{
+				messageName[index2] = buf[index];
+				index++;
+				index2++;
+			}
+			messageName[index2] = '\0';
+			strcpy(msg.name, messageName);
+			msg.count = 0;
+			msg.log_mode = 0;
 			signal_linked_list = list_new();
 		}
 		if(strstr(buf, "SG_") != NULL)
 		{
 			index = 5;
+			index2 = 0;
 			// Store index 5 through * as signal ID in Bike
 			while(buf[index] != ' ')
 			{
@@ -194,6 +207,44 @@ void parseFile(char *fileName)
 			else					// Change data type to double
 			{
 				signode_to_edit->signal->dataType = 4;
+			}
+		}
+		if(strstr(buf, "CM_ BO_") != NULL)
+		{
+			int id = 0;
+			index = 8;
+			while(buf[index] != ' ')
+			{
+				tmp[index-8] = buf[index];
+				index++;
+			}
+			tmp[index-8] = '\0';
+			id = atoi(tmp);
+			tempNode.key = id;
+			index += 2;
+			index2 = 0;
+			while(buf[index] != '"')
+			{
+				tmp[index2] = buf[index];
+				index++;
+				index2++;
+			}
+			tmp[index2] = '\0';
+
+			if(msg.key != id)
+			{
+				msgnode_to_edit = get_message(msg_tree, &tempNode, sizeof(struct message_node));
+				if(strstr(tmp, "increment") != NULL)
+				{
+					msgnode_to_edit->log_mode = 1; // 1 signifies to increment message count each time received
+				}
+			}
+			else
+			{
+				if(strstr(tmp, "increment") != NULL)
+				{
+					msg.log_mode = 1;
+				}
 			}
 		}
 	}

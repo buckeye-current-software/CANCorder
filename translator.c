@@ -73,8 +73,12 @@ int translate(tree *message_tree, tree *signal_tree, struct canfd_frame *frame) 
 	if(is_present(message_tree, &msg_node_key) && frameLength > 0)
 	{
 		msg_node = get_message(message_tree, &msg_node_key, sizeof(struct message_node));
+
+		// Increase count of this message received
+		msg_node->count++;
+
 		node = msg_node->list->head;
-		// Protect against the first list node (signal) being NULL. Serious issue, check message_tree for validity
+		// Protect against the first list node (signal) being NULL. Serious issue occurred, check message_tree for validity
 		if(node == NULL)
 		{
 			return 1;
@@ -111,6 +115,7 @@ int translate(tree *message_tree, tree *signal_tree, struct canfd_frame *frame) 
 			byteData.U64 = byteData.U64 & bitmask;
 
 			signal->dataType = sig_node->signal->dataType; // Due to signals.dataType being different between msg_tree and sig_tree
+
 
 			sem_wait(&semaphore);
 			// Determine how the translated data should be interpreted (int, float, double, etc..)
@@ -187,7 +192,7 @@ int translate(tree *message_tree, tree *signal_tree, struct canfd_frame *frame) 
 			{
 				if(signal->length != 32)
 				{
-					// Float has to have a length of 32 or less...?
+					//
 				}
 				sig_node->value = (double)byteData.FLOAT;
 			}

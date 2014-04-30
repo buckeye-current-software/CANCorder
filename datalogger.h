@@ -16,10 +16,21 @@
 void insert_headers(void *n);
 
 /*
+ * Inserts the names of messages that have a log_mode other than 0.
+ */
+void insert_headers_messages(void *n);
+
+/*
  * Takes a specific node and datalogs it's value into the file. Used in conjunction with
  * avl.h's explore_tree function
  */
 void node_to_file(void *n);
+
+/*
+ * Takes a message node and datalogs the count value stored in the message. Used in
+ * conjunction with avl.h's explore_tree function.
+ */
+void msg_to_file(void *n);
 
 /*
  * Handles the overall datalogging process. Calls other datalogging functions.

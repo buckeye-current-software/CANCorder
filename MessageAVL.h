@@ -10,7 +10,10 @@
 */
 struct message_node {
     int key;
+    char name[50];
     struct my_list *list;
+    int log_mode;
+    int count;
 };
 
 int data_cmp_msg(void *a, void *b);
